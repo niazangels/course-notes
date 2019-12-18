@@ -5,7 +5,11 @@
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 
-resources/ 
+# Don't save data files
+data/
+*.csv
+*.npy
+
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 

@@ -3,6 +3,12 @@
 **Authors:** Soledad Galli, Christopher Samiullah
 
 
+## Resources
+- Joblib explained - http://www.admin-magazine.com/HPC/Articles/Parallel-Python-with-Joblib
+
+## Related notes
+- [Randomness](./randomness.md)
+
 ## Section 2: Machine Learning Pipeline
 
 ### Feature Engineering

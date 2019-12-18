@@ -10,6 +10,7 @@ jupyterlab = "*"
 pandas = "*"
 sklearn = "*"
 matplotlib = "*"
+nltk = "*"
 
 [requires]
 python_version = "3.6"
