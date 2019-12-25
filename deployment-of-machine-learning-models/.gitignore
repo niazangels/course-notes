@@ -10,6 +10,9 @@ data/
 *.csv
 *.npy
 
+# Don't save models
+*.pkl
+
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 

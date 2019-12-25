@@ -10,7 +10,7 @@ def load_dataset(file_name: str) -> pd.DataFrame:
 
 
 def save_pipeline(pipeline, filename="regression_model.pkl") -> None:
-    save_path = f"{config.TRAINED_MODEL_DIR}/filename"
+    save_path = f"{config.TRAINED_MODEL_DIR}/{filename}"
     joblib.dump(pipeline, save_path)
     print(f"Pipeline was saved to {save_path}")
 

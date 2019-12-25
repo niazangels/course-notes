@@ -13,6 +13,7 @@ matplotlib = "*"
 nltk = "*"
 mypy = "*"
 joblib = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.6"

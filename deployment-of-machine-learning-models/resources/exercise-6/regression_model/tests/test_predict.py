@@ -8,7 +8,7 @@ def test_make_single_prediction():
     test_data = load_dataset(file_name="test.csv")
     single_test_json = test_data[0:1].to_json(orient="records")
 
-    subject = make_prediction(input_data=single_test_json)
+    subject = make_prediction(single_test_json)
 
     assert subject is not None
     assert isinstance(subject.get("predictions")[0], float)
