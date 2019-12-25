@@ -15,6 +15,7 @@ CATEGORICAL_VARS_WITH_NA = [
 ]
 
 TEMPORAL_VARS = ["YearRemodAdd"]
+TEMPORAL_REFERENCE_VARS = "YrSold"
 
 # this variable is to calculate the temporal variable,
 # can be dropped afterwards
@@ -53,7 +54,7 @@ price_pipe = Pipeline(
         (
             "temporal_variable",
             pp.TemporalVariableEstimator(
-                variables=TEMPORAL_VARS, reference_variable=DROP_FEATURES
+                variables=TEMPORAL_VARS, reference_variable=TEMPORAL_REFERENCE_VARS
             ),
         ),
         (

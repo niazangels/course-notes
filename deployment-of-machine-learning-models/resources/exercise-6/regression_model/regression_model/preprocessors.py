@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from typing import List
 
@@ -52,7 +53,7 @@ class NumericalImputer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X = X.copy()
         for column in self.variables:
-            X[column].fillna(self.imputer_dict_[column], inplace=True)
+            X[column].fillna(self.column_mode[column], inplace=True)
         return X
 
 
@@ -70,8 +71,7 @@ class TemporalVariableEstimator(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X = X.copy()
         for feature in self.variables:
-            X[feature] = X[self.reference_variable] - X[feature]
-
+            X[feature] = X[feature] - X[self.reference_variable]
         return X
 
 
@@ -146,7 +146,7 @@ class LogTransformer(BaseEstimator, TransformerMixin):
     """Logarithm transformer."""
 
     def __init__(self, variables=None):
-        self.variables = [variables]
+        self.variables = variables
 
     def fit(self, X, y=None):
         # to accomodate the pipeline
@@ -170,15 +170,15 @@ class LogTransformer(BaseEstimator, TransformerMixin):
 
 
 class DropUnecessaryFeatures(BaseEstimator, TransformerMixin):
-    def __init__(self, variables_to_drop=None):
-        self.variables = variables_to_drop
+    def __init__(self, variables_to_drop):
+        self.variables_to_drop = variables_to_drop
 
-    def fit(self, X, y=None):
+    def fit(self, X, y):
         return self
 
     def transform(self, X):
         # encode labels
         X = X.copy()
-        X = X.drop(self.variables, axis=1)
+        X = X.drop(self.variables_to_drop, axis=1)
 
         return X

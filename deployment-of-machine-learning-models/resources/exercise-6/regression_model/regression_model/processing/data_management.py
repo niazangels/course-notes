@@ -6,7 +6,7 @@ from regression_model.config import config
 
 
 def load_dataset(file_name: str) -> pd.DataFrame:
-    return pd.DataFrame.read_csv(f"{config.DATASET_DIR/file_name}")
+    return pd.read_csv(f"{config.DATASET_DIR/file_name}")
 
 
 def save_pipeline(pipeline, filename="regression_model.pkl") -> None:
