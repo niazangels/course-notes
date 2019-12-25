@@ -81,3 +81,13 @@ CATEGORICAL_VARS = [
     "GarageFinish",
     "PavedDrive",
 ]
+
+NUMERICAL_NA_NOT_ALLOWED = [
+    feature
+    for feature in FEATURES
+    if feature not in CATEGORICAL_VARS + NUMERICAL_VARS_WITH_NA
+]
+
+CATEGORICAL_NA_NOT_ALLOWED = [
+    feature for feature in CATEGORICAL_VARS if feature not in CATEGORICAL_VARS_WITH_NA
+]
