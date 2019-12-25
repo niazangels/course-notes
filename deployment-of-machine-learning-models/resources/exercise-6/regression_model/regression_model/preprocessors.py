@@ -8,10 +8,10 @@ class CategoricalImputer(BaseEstimator, TransformerMixin):
         Categorical missing data imputer
     """
 
-    def __init__(self, variables: List[str] = None):
+    def __init__(self, variables: List[str] = []):
         self.variables = variables
 
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> CategoricalImputer:
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> "CategoricalImputer":
         """
         Fit statement to accomodate the pipeline"
         
@@ -24,11 +24,11 @@ class CategoricalImputer(BaseEstimator, TransformerMixin):
         """
         return self
 
-    def transform(self, X: pd.Dataframe):
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """Apply the transformation to a dataframe
         
         Arguments:
-            X {pd.Dataframe} -- features
+            X {pd.DataFrame} -- features
         """
         X = X.copy()
         for column in self.variables:
@@ -59,9 +59,9 @@ class NumericalImputer(BaseEstimator, TransformerMixin):
 class TemporalVariableEstimator(BaseEstimator, TransformerMixin):
     """Temporal variable calculator."""
 
-    def __init__(self, variables=None, reference_col=None):
+    def __init__(self, variables=None, reference_variable=None):
         self.variables = variables
-        self.reference_col = reference_col
+        self.reference_variable = reference_variable
 
     def fit(self, X, y=None):
         # we need this step to fit the sklearn pipeline
@@ -69,8 +69,8 @@ class TemporalVariableEstimator(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         X = X.copy()
-        for column in self.variables:
-            X[column] = X[self.reference_col] - X[feature]
+        for feature in self.variables:
+            X[feature] = X[self.reference_variable] - X[feature]
 
         return X
 

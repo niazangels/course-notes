@@ -23,7 +23,7 @@ def run_training() -> None:
 
     pipeline.price_pipe.fit(X_train[config.FEATURES], y_train)
 
-    save_pipeline(pipeline_to_persist=pipeline.price_pipe)
+    save_pipeline(pipeline=pipeline.price_pipe)
 
 
 if __name__ == "__main__":

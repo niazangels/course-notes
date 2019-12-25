@@ -12,6 +12,7 @@ sklearn = "*"
 matplotlib = "*"
 nltk = "*"
 mypy = "*"
+joblib = "*"
 
 [requires]
 python_version = "3.6"
