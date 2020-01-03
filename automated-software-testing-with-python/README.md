@@ -7,7 +7,7 @@
 
 
 ## How to start writing tests
-- Start withe simplest possible tests
+- Start with simplest possible tests
 - Then develop the simplest possible code to make the test pass. Eg hard code return values
 - Run tests make sure that it passes
 - Continue writing tests that will fail with the simplest code developed above
@@ -71,6 +71,7 @@
 - **Q: how can we make adding docstrings as painless as possible?**
 
 - **Q: what does `werkzeug.security.safe_str_cmp`  do?**
+A: https://github.com/pallets/werkzeug/blob/005812d545065b36be11b60229cedfb125d80cbd/src/werkzeug/security.py#L90
 
 - If you're sending data with `data` attribute in `requests.get()`, you'll need to do `json.loads(r.data)` to get back the data. Requests package actually sends this as form data, so it converts the value of the data attribute to a string format internally.
 
