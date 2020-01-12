@@ -35,3 +35,4 @@
 
 ![More complex examples](images/complex-svm.png "You can even combine two or more SVMs")
 - You can even combine two or more SVMs
+![Types of kernels](images/kernel-types.png "Some examples of other kernel functions")
