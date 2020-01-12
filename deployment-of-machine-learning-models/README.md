@@ -319,3 +319,13 @@ Scikit Learn Objects
 - Delivery and deployments are automated
 - Visibility across the company
 
+
+### Publishing to Package Index server
+- Gemfury is one such private PI server
+- set up env variable PIP_EXTRA_INDEX_URL==https://token@pypi.fury.io/username
+- now you can remove `-e` from requirements, and pull in with the version number directly
+- First time you publish to Gemfury, make sure you train_and_upload_to_gemfury first, before testing ml_api, otherwise, when we test ml_api, it wont be able to find anything in gemfury
+- However, once you have the initial model in gemfury, swap this back because we don't want to publish before we run the tests
+- Use CI caches if necessary. You can use checksum to see if a file has changed, and restore the cache.
+- Train and upload model only when in __master__
+- How to deal with ml_api model version requirements within CI?
