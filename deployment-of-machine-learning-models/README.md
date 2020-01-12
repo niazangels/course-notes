@@ -220,3 +220,102 @@ Scikit Learn Objects
     - datasets have high feature space (tests, FE)
     - model is constantly enriched with new data sources
 
+
+## 6. Hands on with housing prices prediction
+- Ensure modularity
+- Write tests for single as well as multiple predictions
+- Ensure all preprocessing is nicely abstracted away
+- Separate out any feature engineering:
+    - Lines between feature engineering and preprocessing can be very blurred
+    - You might even need to call external APIs for feature engineering
+    - Eg. sending out location co-ordinates to get crime statistics
+
+### Versioning and Logging 
+- `TimedRotatingFileHandler`
+- `logger.propagate`
+- In the `save_pipeline` method, delete any existing model files
+- You can use `logger.info` when running pytest and it will still work (unlike `print`)
+- Log model_version, input, predictions
+
+## Building the package
+- [Video](https://www.youtube.com/watch?v=na0hQI5Ep5E) Inside the Cheeseshop: How Python Packaging Works | SciPy 2018 | Dustin Ingram 
+- Docs on packaging: https://packaging.python.org/
+- Needs
+    - `requirements.txt`
+        - Include `setuptools`, `wheel` (but why? we're packaging from host environment, right?)
+        - Explicitly specify versions
+    - `setup.py`
+    - `MANIFEST.ini` - specify what dirs and files to include in the package
+- run `python setup.py sdist bdist_wheel`
+- this will create source distribution (`.tar.gz`) and wheel distribution(`.whl`) repectively
+- Use pip install -e regression_model
+
+## 7. Serving our model with a REST API
+- Serve predictions to multiple clients
+- Decouple model development from client facing layer
+- Potentially combine multiple models at different API endpoints
+- Scales horizontally
+
+### Structure
+```
+    + root/
+    |_ ml_api/
+        |_ app/
+            |_
+        |_ requirements.txt (contains `-e "path/to/regresion/model"`)
+        |_ __init__.py
+    |_ regression_model
+```
+- Use blueprints if necesary(subdomains, url-prefixes etc) 
+- Don't forget to register the Blueprint
+- Have a heartbeat api "/health" that always returns 200 OK, "ok", so you can see the text on your browser
+
+### Configurations
+- Create confgs as classes:
+    ```python
+        class Config:
+            DEBUG = False
+            TESTING = False
+            CSRF_ENABLED = True
+            SECRET_KEY = 'this-really-needs-to-be-changed'
+            SERVER_PORT = 5000
+        
+        class ProductionConfig(Config):
+            DEBUG = False
+            SERVER_PORT = os.environ.get('PORT', 5000)
+        
+        class DevelopmentConfig(Config):
+            DEBUG = True
+            DEVELOPMENT = True
+        
+        class TestingConfig(Config):
+            TESTING = True
+    ```
+- Make the API a thin layer
+- Have api versions included in the route `/v1/regression-model/predict`
+- This is NOT the model version, but the api version, so we can change the API contract later
+- `/version` endpoint should return both model version as well as api version
+- No feature engineering or adjustnments should in the /predict api
+- They should be within the model package
+- Log both inputs and outputs in separate steps so you don't break if model.predict() fails
+- When returning response, send model version number too
+- When writing tests for the API, testing file should come directly from the model package
+- So when model changes, test is automatically updated
+- Have a `validate_inputs` function to validate inputs to model (eg. data types) or return appropriate error
+- You could filter invalid inputs from inputs received, and return all error rows with the response of the `/predict` endpoint
+- If you have a field beginning with a number, you might have to hack around this, because Python doesn't let you create variables starting with numbers
+
+## 8. Continuous Integration / Continuous Deployment
+
+- CI -> C Delivery -> C Deployment
+
+- CI [Build -> Test -> Merge]
+- Continuous Delivery [Automatically release to repository]
+- Continuous Deployment [Automatically deploy to production]
+
+- System is always in a releasable state
+- Faster regular release cycle
+- Build and test is automated
+- Delivery and deployments are automated
+- Visibility across the company
+
