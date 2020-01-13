@@ -329,3 +329,34 @@ Scikit Learn Objects
 - Use CI caches if necessary. You can use checksum to see if a file has changed, and restore the cache.
 - Train and upload model only when in __master__
 - How to deal with ml_api model version requirements within CI?
+
+
+## 9. Differential tests
+- A type of test that compraes the differences in execution from one version of the system to the next when inputs are the same
+- Compares old model to a new one
+- AKA Back to back testing
+- Useful for detecting ML system errors that don't raise exceptions (eg. forgetting to do a preprocessing step)
+- Tuning the models is a balancing act (even with differential tests, based on business requirements)
+- Can prevent painful mistakes that are not detected for long periods of time
+
+### Setting up a differential test
+- Create a new dir called "ml_api/tests/differential_tests"
+
+- To run diff tests in a job (with ml_api, so you can pip install your packaged model versions):
+    - Make predictions with the old requirements (saved as diff_requirements.txt)  and save to a file. This req file needs to have the previous model version listed.
+    - Then install latest requirements.txt and run just diff tests 
+
+### Details
+- Mark differential tests as such `@pytest.mark.differential` decorator
+- Update CI file to not call differential tests during `test_ml_api` stage
+- eg. `pytest -vv packages/ml_api/tests -m "not differential"`
+- Uses previous data and predictions pair and asserts if new model makes predictions within a preset x% range of previous values
+- Also assert that the length of both predictions are the same
+- Ensure that the range is configurable in config file 
+- The first initialization of the predictions need to be done manually- afterwards we can rely on CI to do this for us. To get the ball rolling, we need a function to load the data, select a slice, make predictions and save the predictions to within the package (Setion 9.3 & 9.4)
+- Easier with docker containers, because then you can spin up the corresponding container and not hack around with the requirement.txt
+
+### Other tests
+- If a predictor and/or training speed is a key metric, hace separate benchmark tests to compare speed of functions fron one system to the next.
+- This is done best with the `pytest-benchmark` package
+- In complex microservice environments, consider contract testing. A nice framework for this is `pact`.
