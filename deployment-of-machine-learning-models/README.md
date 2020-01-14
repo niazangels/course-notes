@@ -360,3 +360,98 @@ Scikit Learn Objects
 - If a predictor and/or training speed is a key metric, hace separate benchmark tests to compare speed of functions fron one system to the next.
 - This is done best with the `pytest-benchmark` package
 - In complex microservice environments, consider contract testing. A nice framework for this is `pact`.
+
+
+## Deploying to Heroku
+- Any time you find yourself directly pushing to production or ssh-ing into the production machine, you need to question your setup, because that is a great way to make mistakes, introduce bugs or even bring the whole system down
+- Use CI pipelines to do deploys
+
+
+## Deploying to AWS
+### ECS - Elastic Container Service Overview
+- Cluster > Service > Task definition > Contianer definition
+- Task def. is a blueprint for an application. Required for ECS.
+- Defines what images to use, how many containers to spawn, how much resources to allocate
+- Entire application does not need to stand on a single task, and in most cases, it should not.
+- ECS lets you run and maintain a specified number of instances of a task definition. This is called a service
+- When an instance of task def is killed, a new one is spawned based on the scheduling strategy
+- CLuster is a grouping of tasks or services
+- Two launch types: Fargate (automatically provisioned, load balanced, scaled - question is when should you specify multiple containers in the same task )
+- ECS for Kubernetes (EKS) is an alternative to pure Kubernetes
+
+### IAM 
+- Create new group (collection of permissions)
+    - EC2 Containers Service - full access
+    - Elastic Container registry - full access
+    - IAM - read only access
+
+- Create new user
+    - Programatic access
+    - Attach group
+
+- Download Access key id, secret
+
+### Install AWS CLI
+- pip install
+
+### ECS
+- Create new registry
+- Build and tag image with `registry_name/image_name`
+- Log into ECR: `aws ecr get-login --no-include-email --region us-east-1`
+
+## 13. Productionizing CNNs
+- Keep same structure as for sklearn
+- Ensure model.py has a function that returns the model with hyperparameters determined from args
+- `KerasClassifier` from sklearn 
+- We cant include the processor to modify the target because the sklearn `Pipeline` only allows to change training data and not the target. We'll have to do this within the training pipeline
+- Cannot save the entire pipeline as an object when using `KerasClassifier`, so save each step separately.
+- Save the model in one file, classes in another pickle, and the weights in an h5 file. 
+- This means you have to reassemble the KerasClassifier before loading the weights for predictions
+
+### Causes for non reproducibility in NNs
+- Random init of layer weights
+- Shuffling of datasets
+- Noisy hidden layers (Dropout)
+- Changes in ML frameworks
+- GPU params are stochastic
+
+### How to overcome this?
+- Keras gets randomness from Numpy random number generator, so seed this generator for both Theano and TF
+- TF uses multiple threads, which may cause non reproducible results. Force TF to use a single thread.
+- set `PYTHONHASSEED=0` before running Python
+- Set the cuDNN as deterministic
+
+- To ensure reproducible results when utilising Keras in CPUs you need to do the following:
+    ```python
+    # Seed value
+    seed_value= 0
+    
+    # 1. Set `PYTHONHASHSEED` environment variable at a fixed value
+    import os
+    os.environ['PYTHONHASHSEED']=str(seed_value)
+    
+    # 2. Set `python` built-in pseudo-random generator at a fixed value
+    import random
+    random.seed(seed_value)
+    
+    # 3. Set `numpy` pseudo-random generator at a fixed value
+    import numpy as np
+    np.random.seed(seed_value)
+    
+    # 4. Set `tensorflow` pseudo-random generator at a fixed value
+    import tensorflow as tf
+    tf.set_random_seed(seed_value)
+    
+    # 5. Configure a new global `tensorflow` session
+    from keras import backend as K
+    session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+    sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+    K.set_session(sess)
+    ```
+
+    - With this snippet of code, you wouldn't have to specify any other seed or random_state in numpy, scikit-learn or tensorflow/keras functions, because with the source code above we set globally their pseudo-random generators at a fixed value.
+
+
+- If you are working with training data that might change (data stored in s3), you should provide a reference to your s3 bucket that is included with your model package
+- Strip all apostrophes from filenames if required
+- Pushing large files may require a different url (as required in Gemfury)
