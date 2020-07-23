@@ -38,7 +38,6 @@
 
 ## Words are too abstract
 - Opposite side of the spectrum 
-- 
   - > "Perform a semantic search"
   - > "Add notifications"
   - > "Build a calendar view"
@@ -81,7 +80,7 @@
     - shapers are working on what the teams might potentially build in a future cycle
   - **Building**
     - building work that's been previously shaped 
-    - 
+  
 > Work on the shaping track is **kept private and not shared with the wider team** until the commitment has been made to bet on it. That gives the shapers the option to put work-in-progress on the shelf or drop it when it's not working out.
 
 ## Steps to shaping
@@ -494,3 +493,114 @@
 -  A hard deadline and the chance of not shipping motivates the team to regularly question their design and implementation wrt. scope
 
 ## What about bugs?
+- Nothing special about bugs that makes them automatically more important than everything else.
+- If we’re in a real crisis, we’ll drop everything to fix it. But crises are rare. 
+- If we tried to eliminate every bug, we’d never be done. 
+- **You can’t ship anything new if you have to fix the whole world first.**
+- @niazangels - Mega Issues are forever open problems about the world
+- Three recommended strategies
+  - **Use cool-down:** two weeks every six weeks actually adds up to a lot of time for fixing them.
+  - **Bring it to the betting table:** If a bug is too big to fix during cool-down, it can compete for resources at the betting table. eg. synchronous step to an asynchronous job
+  - **Schedule a bug smash:** Once a year—usually around the holidays—we’ll dedicate a whole cycle to fixing bugs. Hard to get normal work done when people are taking their days off.The team can self-organize to pick off the most important bugs.
+
+## Keep the slate clean
+- The key to managing capacity is giving ourselves a clean slate with every cycle. 
+-  We don’t know what brilliant idea will emerge or what urgent request might appear.
+-  Suppose we envision a feature that takes **two cycles to ship**. We reduce our risk dramatically by shaping a specific six week target, with something fully built and working at the end of that six weeks. If that goes as expected, we’ll feel good about betting the next six weeks the way we envisioned in our heads. But if it doesn’t, we could define a very different project. 
+
+# Chapter 9 - Place your bets
+
+## Shaping new products
+- Three phases generally
+- The way that we shape and our expectations for how the team works during the cycle are different. 
+- These phases unfold over the course of multiple cycles, but we still only bet one cycle at a time.
+
+### R&D Mode
+- our idea is just a theory or a glimmer
+- don’t know if the bundle of features we imagine will hold together in reality
+- there is a lot of scrapwork. We might decide half-way to standing up a feature that it’s not what we want and try another approach instead.
+- In other words, we can’t reliably shape what we want in advance and say: “This is what we want. We expect to ship it after six weeks.”
+
+- Adjustments for this phase
+  -  The shaping is much fuzzier because we expect to learn by building.
+  -  Senior people make up the team because
+     - You can’t delegate to other people when you don’t know what you want yourself. 
+     - Architectural decisions will determine what’s possible in the product’s future
+   - Lastly, we don’t expect to ship anything at the end of an R&D cycle. The aim is to spike, not to ship.The goal is to learn what works so we can commit to some load-bearing structure: frontend and backend.
+   - Best case scenario: some UI and code committed to serve as the foundation
+ - **We can’t ship anything to customers with just a single cycle of R&D work.** But we still don’t commit to more than one cycle at a time. **We may learn from the first cycle that we aren’t ready to tackle the product yet.**
+
+### Prodiction mode
+- The key architectural decisions are settled. The product does those few essential things that define it, and the foundation is laid for the rest.
+- Now we behave exactly the same as when we work on an existing product. Regular shape up process
+- Adjustments:
+  - Shaping is deliberate again.
+  - No longer limited to the senior group.
+  - Shipping is the goal, not spiking. Shipping means merging into the main codebase.
+  - Since we aren’t shipping to customers at the end of each cycle, we maintain the option to remove features from the final cut before launch.
+  - We can bet six weeks on a feature without knowing if we’ll want it in the final product. That’s not a problem as long as we set expectations for the build team: **we can’t predict what we’ll want in the final cut, and we’re willing to risk this cycle to take our best swing at the idea**.
+
+### Cleanup mode
+- In the final phase before launching the new product, we throw all structure out the window. 🤣
+- **Clean up**: Unstructured and unshaped part before launch to fix whatever is needed
+- Things we dismissed before pop out at us with new importance - bugs, things we forgot, things we missed.
+  - There’s no shaping
+  - Leadership stands at the helm throughout the cycle, calling attention to what’s important 
+  - Work is merged to the main codebase continuously in as small bites as possible.
+  - **We have to check ourselves to make sure these are must-haves we’re working on**, not just our cold feet begging us to delay launch. Cleanup shouldn’t last longer than two cycles.
+
+- Sometimes we need to see all the features working as a whole to judge what we can live without and what might require deeper consideration
+- @niazangels - Sprint 1 launch of Voody, we never had the whole picture until the last day.
+
+### Example of a new product: Hey!
+- HEY was in R&D mode for the first year of its development
+- Jason (CEO), David (CTO), and Jonas (senior designer) explored a wide variety of ideas before settling on the core. 
+- Nearly a year of production mode cycles followed, where the whole team fleshed out HEY’s feature set.  
+- We ended with two cyles of cleanup and **significantly cut back the feature set** to launch in July 2020.
+- The betting table didn’t know they would be working on HEY for two years during those first few R&D cycles.
+
+### Experimental features
+- Break into multiple cycles- first cycle should delivers somethings useful but need not be shipped to customers.
+- Don't expect to ship it to customers without doing an additional cycle on it. 
+
+
+## Questions to ask at the betting table
+- **Does the problem matter?**
+  - The solution doesn’t matter if the problem isn’t worth solving.
+  - Of course, any problem that affects customers matters. But we have to make choices because **there will always be more problems than time to solve them**. 
+  - Sometimes a solution that is too complicated or too sweeping may invite questions about the problem.
+  - Narrow down to get 80% of the benefit from 20% of the change.
+ 
+- **Is the appetite right?**
+  - Suppose a stakeholder says they aren’t interested in spending six weeks on a given pitch
+  - Maybe the problem wasn’t articulated well enough, and there’s knowledge that the shaper can add to the conversation right now to swing opinion.
+    -  “Yeah it doesn’t happen often, but when it does people are so vocal about it that it really tarnishes perception of us.”
+    -  “Maybe it sounds trivial, but support has to go through 11 time-consuming steps to get to resolution.”
+   -  Sometimes saying “no” to the time commitment is really saying no to something else. To uncover, ask:
+      -  “How would you feel if we could do it in two weeks?”
+      -  CTO might answer: “I don’t want to introduce another dependency into that area of the app.”
+    - The shaper might just let the idea go if interest is too low.
+    - The shaper might go back to the drawing table and either work on a smaller version (for a shorter appetite) or do more research if they believe the problem is compelling but they weren’t armed well enough to present it.
+
+- **Is the solution attractive?**
+  - problem may be important and the appetite fair, but there can be differences about the solution.
+  - Eg. if the solution involves adding a button, we give up real estate which can't be used in the future.
+  - **Someone might offer an immediate design solution. Generally, avoid doing design work or discussing technical solutions for longer than a few moments at the betting table.**
+
+- **Is this the right time?**
+  - Largely shaped by what we have been doing lately:
+    - Too long since we released a new feature?
+    - Too many features released recently that need fixing up?
+    - Same team has been working on the same thing for a while now? Their morale may dip.
+  - Might pass on a project because of these
+
+- **Are the right people available?**
+  -  Select from a pool of core "product team" when planning teams for each cycle.
+  -  Team depends on expertise required
+     - This other one is going to invite a lot of scope creep so we need someone who’s good with the scope hammer.
+     - We need some more front-end programming on this one.
+  - Preference of players to small/large batch in this cycle
+  - Vacations or sabbaticals
+
+## Post the kick-off message
+- After the bets are made, someone from the betting table will write a message that tells everyone which projects we’re betting on for the next cycle and who will be working on them.
