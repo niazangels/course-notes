@@ -17,3 +17,4 @@
 ## Frontend
 - 🖥️ [Advanced CSS and SCSS](./advanced-css-and-sass/README.md)
 - 🖥️ [Complete Javascript Course](./complete-javascript-course/README.md)
+- 🖥️ [Modern React with Redux](./modern-react/README.md)
