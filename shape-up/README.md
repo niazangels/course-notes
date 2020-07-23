@@ -401,6 +401,8 @@
 -  This gives everyone the maximum amount of time under their own control for doing real work, keeps the betting table short and productive
 - People comment on the pitch asynchronously. Not to say yes or no — that happens at the betting table — but to poke holes or contribute missing information.
 
+# Part 2 - Betting
+
 # Chapter 7: Bets, not backlogs
 
 ## No backlogs
@@ -604,3 +606,41 @@
 
 ## Post the kick-off message
 - After the bets are made, someone from the betting table will write a message that tells everyone which projects we’re betting on for the next cycle and who will be working on them.
+
+
+# Part 3 - Building
+
+# Chapter 10 - Hand over responsibility
+
+## Assign projects, not tasks
+- Team should never lose sight of the bigger picture. So don't cut the work into pieces and hand out each item
+- Trust the team to take on the entire project and work within the boundaries of the pitch.
+- They will have **full autonomy** and use their judgement to execute the pitch as best as they can.
+- Remember: we aren’t giving the teams absolute freedom to invent a solution from scratch. **We’ve done the shaping. We’ve set the boundaries. Now we are going to trust the team to fill in the details**
+
+## Done means deployed
+- At the end of the cycle, the team will deploy their work. Small teams will make multiple deployments
+- **Any testing and QA needs to happen within the cycle.** 
+- Help documentation, marketing updates, or announcements are thin-tailed from a risk perspective (they never take 5x as long as we think they will) and are mostly handled by other teams. It doesnt fit in the cycle
+- Take care of those updates and publish an announcements during cool-down after the cycle.
+
+## Kick off
+- Post the shaped concept to the team
+- Team for that project start a kick off call
+- The call gives the team a chance to ask any important questions that aren’t clear from the write-up. 
+- Then, with a rough understanding of the project, they’re ready to get started.
+
+## Getting oriented
+- No deliverables or tasks checked off in the first few days
+- Everyone is busy learning the lay of the land and getting oriented.
+- Teams have to acquaint themselves with the relevant code, think through the pitch, and go down some short dead ends to find a starting point. 
+- Empower the team to explictly say **“I’m still figuring out how to start”** so they don’t have to hide this legitimate work.
+- If the silence doesn’t start to break after three days, that’s a reasonable time to step in and see what’s going on.
+
+## Imagined vs discovered tasks
+- As teams get their hands dirty, they discover all kinds of other things that we didn’t know in advance.
+- For example, the designer adds a new button on the desktop interface but then notices there’s no obvious place for it on the mobile webview version. 
+- **The way to really figure out what needs to be done is to start doing real work.**
+- They need to pick something meaningful to build first.
+
+# Chapter 11: Get One Piece Done
