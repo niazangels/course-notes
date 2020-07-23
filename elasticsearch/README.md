@@ -1,0 +1,21 @@
+- **Elasticsearch** is a management framework for running distributed installations of **Apache Lucene**
+- **Lucene** holds the data and does all the indexing
+- The highest level unit of ES is the **cluster**. A cluster is a collection of ES nodes and indices.
+- Nodes are instances of ES - either separate processes or individual servers
+- Servers and nodes are not the same
+- Nodes can join exactly one cluster
+- There are different *Types* of node:
+  - **Master -eligible nodes** vote for a master that runs the cluster and index management.
+  - **Data Nodes** run data operations- storing, indexing and searching of data
+- **Indices** do not hold data themselves- they are just another abstraction for the thing that actually holds data
+- Any action you do on data such as INSERTS, DELETES, indexing and searching run against an Index
+- Indices can belong to exactly one cluster and are comprised of **Shards**.
+  
+- Shards are instances of Apache Lucene
+- A shard can hold many Documents
+- Shard does the actual data storage, indexing and searching. 
+- A shard belongs to exactly one node and index.
+- There are two types of shards: primary and replica.They hold the same data, and searches run against all shards in parallel
+- Primary shard is the only one that can accept indexing requests.
+-  Should the node that the primary shard resides on die, a replica shard will take over and become the primary. Then, ES will create a new replica shard and copy the data over.
+
