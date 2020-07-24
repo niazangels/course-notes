@@ -116,4 +116,58 @@
 - `<Comment author="Niyas" message="Sup bro?" />` will give `Comment` two props: `author` and `message`
 - `<ApprovalCard> <Comment /> </ApprovalCard>` gives `ApprovalCard`'s props a `children` property 
 - So inside `ApprovalCard` you can say `<div> {props.children} </div>` and render the children
-- You don't have to pass in a component as above- you can pass in any valid html including plain text
+- You don't have to pass in a component as above- you can pass in any valid html including plain textGa
+
+# Section 4 - Structuring Apps with Class Based Components
+
+### How react *used to be*
+- **Class components**
+  - Can produce JSX to show content to users
+  - Can use lifecycle system to run code at specific points of time
+  - Can use the `state` system to update content on the screen
+
+- **Functional components**
+  - Can produce JSX to show content to users
+
+## But now
+- **Functions components** 
+  - Can use Hooks to run code at specific points of time
+  - Can use Hooks to access `state` and update content on the screen
+
+## Seasons Project
+- GeoLocation results may arrive only after JSX is rendered
+- So we will class based components to rerender content when we have the results
+
+## Rules of Class Based Components
+- Must be a JS class
+- Must extend React.Component (by inheriting)
+- Must define a render method that returns some JSX
+
+```javascript
+class App extends React.Component {
+    
+    constructor(props){
+        super(props);
+        this.state = {};
+    }
+
+    render() {
+        return <h1> Hello </h1>
+    }
+}
+```
+
+# Section 5 - State in React Components
+
+## Rules of State
+- Only usable directly by class based components
+- Easy to confuse props with state
+- `state` is a JS object that contains data relevant to a component
+- Updating a component's `state` almost instantly causes it to rerender
+- `state` must be initialized when a component is created
+- `state` **can only be updated using the function** `setState`
+
+## More on classes
+- **JS classes are based on prototypal inheritance**
+- Classes may have a `constructor` that receives `props` as argument
+- 
