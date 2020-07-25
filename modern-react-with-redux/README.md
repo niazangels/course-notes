@@ -117,6 +117,10 @@
 - `<ApprovalCard> <Comment /> </ApprovalCard>` gives `ApprovalCard`'s props a `children` property 
 - So inside `ApprovalCard` you can say `<div> {props.children} </div>` and render the children
 - You don't have to pass in a component as above- you can pass in any valid html including plain textGa
+- After creating a class based component, you can set the default props as follows:  
+```javascript
+    ComponentName.defaultProps = {key: value}
+``` 
 
 # Section 4 - Structuring Apps with Class Based Components
 
@@ -151,12 +155,36 @@ class App extends React.Component {
         this.state = {};
     }
 
+    componentDidMount() {
+        // The recommended place to put all data loading code
+        ...
+    }
+
+    componentDidUpdate() {
+        ...
+    }
+
+    componentWillUnmount() {
+        ...
+    }
+
     render() {
         return <h1> Hello </h1>
     }
 }
 ```
 
+```javascript
+class App extends React.Component {
+
+// Alternate state initialization
+state = {}
+
+render() {
+
+    }
+}
+```
 # Section 5 - State in React Components
 
 ## Rules of State
@@ -170,4 +198,34 @@ class App extends React.Component {
 ## More on classes
 - **JS classes are based on prototypal inheritance**
 - Classes may have a `constructor` that receives `props` as argument
-- 
+
+# Section 6  - Understanding Lifecycle Methods
+
+## Component Lifecycle is as follows
+  - constructor
+  - render
+  - *Component is shown on screen*
+  - componentDidMount
+  - *Sit and wait for updates*
+  - componentDidUpdate
+  - *Sit and wait till component is no longer shown*
+  - componentWillUnmount
+
+## Styling
+-  `import './SeasonDisplay.css';`
+-  You can import CSS files inside Component files
+-  Webpack is going to figure this out and stick it into the index.html file (how?)
+-  Tip: avoid having multiple return statements within the render method. If you have conditional rendering, offload the conditional rendering to another function. This helps you style the outer content eg. if you always need a red border around the rendered component.
+
+```javascript
+class Spinner extends React.Component {
+
+    render() {
+        return (
+            <div>
+                {this.renderConditionally()}
+            </div>
+        );
+    }
+}
+```
