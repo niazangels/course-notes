@@ -229,3 +229,176 @@ class Spinner extends React.Component {
     }
 }
 ```
+
+# Section 7 - Handling User Input with Forms and Events
+
+## Event Handler Example
+- Event callbacks will **always** take the event as an argument
+  
+```javascript
+class SearchBar extends React.Component {
+    onInputChange(e) {
+        console.log(e.target.value)
+    }
+    render() {
+      return <input type="text" onChange={this.onInputChange} />
+
+    }
+}
+
+```
+
+## Controlled vs Uncontrolled
+
+- A controlled flow
+  - User types in input
+  - Callbacks gets invoked
+  - we call setState with new value
+  - Component rerenders
+  - Input is told what it's value is (from state)
+
+## Arrow functions
+- Enables `this` to be accessible inside the body
+
+
+## Responsibility in Components
+- `SearchBar` component does not need to make API requests- that's a job for `App` component
+- `SearchBar` needs to communicate "up" to it's parent `App`
+- One solution is to define `onSearchSubmit` in `App` and pass it down as a prop to the `SearchBar`. So whenever the form is submitted, the callback is invoked by `App`'s definition of `onSearchSubmit`
+
+# Section 8 - Making API requests with React
+- Axios returns a promise. 
+- You can chain on a `.then()` function
+
+```javascript
+// Chaining
+axios.get(URL,
+      {
+          headers: { .. },
+          params: { .. }
+      }).then(
+        (reponse) => { .. }
+      )
+```
+
+```javascript
+// Async/Await
+async onSubmit(term) {
+  const resposne = await axios.get(URL);
+  console.log(response);
+}
+```
+
+```javascript
+// Async/Await Arrow function
+onSubmit = async(term) => {
+  const resposne = await axios.get(URL);
+  console.log(response);
+}
+```
+
+```javascript
+// Axios reusable object
+ax = axios.create({
+    baseURL: 'https://api.unspash.com',
+    headers: { .. }
+});
+```
+
+# Section 9 - Building Lists of Records
+
+## Understanding .map()
+
+```javascript
+const numbers = [1, 2, 3, 4, 5, 6];
+let newNumbers = [];
+
+// Using for
+for (let i = 0; i < numbers.length; i++){
+  newNumbers.push(2*numbers[i])
+}
+
+// Using map
+newNumbers = numbers.map(
+  (i) => { return (2*i); }
+)
+
+// Using map
+newNumbers = numbers.map( i => 2*i});
+```
+
+
+## Question: why does the following work? Isn't it violating the "I can only return one element" principle?
+
+```javascript
+class ImageList extends React.Component {
+
+    render() {
+        return (
+                this.props.images.map(
+                    (image) => { return <img src={image.urls.small} /> }
+                )
+        );
+    }
+}
+```
+
+## Understanding `key` prop
+- Required for React to append only new items to DOM
+- If an item is already rendered, React wont update it again in DOM
+- `key` helps React identify and compare items. It's purely a performance consideration.
+- `key` is passed in as a prop. You don't need to do anything with the key in the background, nor return it as an attribute in the rendered html.
+
+## Using `refs` for DOM access
+- Let the element render itself
+- Reach into the DOM and figure out properties of the element (eg. height)
+- Set the height on `state` to get the component to rerender
+- When rerendering, assign new html attributes or inline styles
+- React `ref`s gives access to a single DOM element
+- We create `ref`s in constructor & assign them to instance variables & then pass to a particular JSX element as prop
+- No need to put this into state - we only add something to state if we expect it to change over time
+- React components eventually gets converted into DOM elements. There's no good way of accessing DOM elements outside of the `ref` system
+
+## Gotchas
+- Browser consoles are "extremely fancy"
+- When they print out `{current: <obj>}` they don't know yet what `<obj>` is
+- It only knows the height once we expand that object
+- During the mounting, images are not loaded immmediately as they require the network request to be completed
+
+
+```javascript
+
+class ImageCard extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = { spans: 0 };
+        
+        // This is how to create a `ref`
+        this.imageRef = React.createRef();
+    }
+
+
+    componentDidMount() {
+        // Ensure a callback is fired only after the image has loaded
+        this.imageRef.current.addEventListener('load', this.setSpans);
+    }
+
+    setSpans = (e) => {
+      // Since the image has loaded, we now have the actual height
+      const height = this.imageRef.current.clientHeight;
+      // The following will cause the object to rerender itself
+      this.setState({ spans: height });
+    }
+
+    render() {
+        return (
+          <img 
+            ref={this.imageRef} 
+            style={{ property: this.state.spans }} 
+          />
+        );
+    }
+}
+
+```

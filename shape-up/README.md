@@ -644,3 +644,14 @@
 - They need to pick something meaningful to build first.
 
 # Chapter 11: Get One Piece Done
+- It’s important at the early phase the team doesn't create a master plan of parts that only come together at the 11th hour.
+- A team can do a lot of work but feel insecure because they don’t have anything real to show for it yet. 
+- Lots of things are done but nothing is finished.
+- **Aim to make something tangible and demoable early—in the first week**. This requires integrating vertically on one small piece of the project.
+- ![Nothing works](https://basecamp.com/assets/books/shapeup/3.2/back-end_only-e8b9580807d4b4b50a31627b20d37c1dcf90c55b1f0cc20d5ab88f25888b6bf6.png)
+
+- ![Something works](https://basecamp.com/assets/books/shapeup/3.2/one_slice-4cbcdda1a5cdc1b2bdc9bf7bd023cc0c5af666c5857c6e7d32650d9229a81cf0.png)
+- Then when one piece is done, the team has something tangible that they’ve proven to work (or not work and reconsider).
+- Case study: [Share item with client](https://basecamp.com/shapeup/3.2-chapter-11#case-study-clients-in-projects)
+
+## Programmers don’t need to wait
