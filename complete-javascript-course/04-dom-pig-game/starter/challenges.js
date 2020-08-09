@@ -18,7 +18,7 @@ GAME RULES:
 
 */
 
-var playerScores, currentScore, playerTurn, gameOver, lastDice;
+var playerScores, currentScore, playerTurn, gameOver, lastDice, maxScore;
 var $ = document.querySelector.bind(document);
 var domDice = $('.dice');
 lastDice = NaN;
@@ -60,7 +60,7 @@ $('.btn-hold').addEventListener('click', function () {
     $('#score-' + playerTurn).textContent = playerScores[playerTurn];
 
     // Check winner
-    if (playerScores[playerTurn] >= 10) {
+    if (playerScores[playerTurn] >= maxScore) {
         gameOver = true;
         domDice.style.display = 'none';
         $('#name-' + playerTurn).textContent = "Winner!";
@@ -75,6 +75,7 @@ $('.btn-new').addEventListener('click', newGame);
 
 function newGame() {
 
+    maxScore = prompt("Enter max score to win:");
     playerScores = [0, 0];
     currentScore = 0;
     playerTurn = 0;
