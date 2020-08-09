@@ -55,7 +55,7 @@ names[5] = "Charlie"
 // empty means undefined
 ```
 
-## How Javascript works behind the scenes
+## Section 3: How Javascript works behind the scenes
 - JS code is usually hosted in a browser/nodejs/other apps
 - Host contains a JS engine that executes it
 - V8, SpiderMonkey, Javascript core etc. are all engines
@@ -168,3 +168,32 @@ var mike = {
 mike.calcAge = john.calcAge
 mike.calcAge() // logs `mike` and 20
 ```
+
+## Section 4: DOM Manipulation
+- Document Object Model
+  - Structured representation of HTML page
+  - Used to connect webpages to scripts like JS
+  - For each HTML box, there's an object in the DOM we can access and interact with
+
+- JS is not DOM. JS interacts with DOM
+
+### Basics
+
+- `document.querySelector` selects DOM objects just like CSS but only the first element.
+- `document.querySelector(obj).style` can be used to get/set all css properties such as `style.display = None`
+
+
+### Events
+
+- Events are notifications sent to the code that something has happened on the page
+- Event listener is a fn that performs an action based on a certain event
+- **An event can only be handled when the execution stack is empty** 🤯 
+- So all exec stacks should have returned
+- Besides the Execution stack, we also have a message queue in the JS engine
+- The events sit waiting to be processed until we return to global context
+- When it does, the next ev gets processed
+- So the ev handler picks it up and it gets its own execution context
+- `DOMobject.addEventListener('click', fn)`
+- Anonymous fn does not have a name and hence cannot be reused 
+- `getElementById` is faster than `querySelector`
+
