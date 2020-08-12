@@ -20,4 +20,4 @@
 - 🖥️ [Modern React with Redux](./modern-react/README.md)
 
 ## Writing
-- 🖥️ [Write a Killer Literature Review](./write-a-killer-literature-review/README.md)****
+- 🖥️ [Write a Killer Literature Review](./write-a-killer-literature-review/README.md)
