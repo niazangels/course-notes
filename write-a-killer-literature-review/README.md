@@ -7,6 +7,14 @@
 - Web of sciences: find traces of literature https://webofknowledge.com
 - They say / I say :Book on academic writing https://www.amazon.com/They-Say-Matter-Academic-Writing/dp/039393361X
 
+## Slides
+- [Part 1](assets/Lecture-1.pdf)
+- [Part 2](assets/Lecture-2.pdf)
+- [Part 3](assets/Lecture-3.pdf)
+- [Part 4](assets/Lecture-4.pdf)
+- [Part 5](assets/Lecture-5.pdf)
+- [Part 6](assets/Lecture-6.pdf)
+
 ## Section 1
 
 ### What is the function of a lit review?
