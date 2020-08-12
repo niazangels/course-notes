@@ -197,3 +197,44 @@ mike.calcAge() // logs `mike` and 20
 - Anonymous fn does not have a name and hence cannot be reused 
 - `getElementById` is faster than `querySelector`
 
+
+## Section 5: Objects and Functions
+- "Everything is an object. Except the primitives"
+- Numbers, Strings, Booleans, Undefined, Null are all primitives
+- Everything else including Arrays, fn, Dates are all objects
+
+### Prototypal inheritance
+- In other programming languages, its called a class. In js its called a constructor or prototype
+- Each and every js obj has a prototype property
+- Prototype property is where we put methods and properties that we want other objects to inherit 
+- Constructor's prototype property is not the prototype of the constructor itself, it's the prototype of all instances created through it.
+- When a prop or method is called, the search starts in the instance and follows the prototype chain
+![picture 1](images/c983e23b8db28412a8a831068e465d94b2d7ed4966a610f622d266982c9cef49.png)  
+
+- **@niazangels: This is the Prototype design pattern 😲**
+- All prototypes inherit from the `Object` prototype which inherits from the `null` primitive. 
+- So if the parameter is not found it is `undefined`. Wut? 😕
+
+### The `new` keyword
+- `new` creates an empty `Object`
+- Attaches it to the `this` keyword in the context for running the fn
+- If we dont attach to `this`, `this` would point to the global excon
+- value is usually stored as a var
+
+```javascript
+var Person = function(name, yearOfBirth, job){
+  this.name = name;
+  this.yearOfBirth = yearOfBirth;
+  this.job = job;
+}
+
+Person.prototype.calculateAge = function(){
+  console.log(2020 - this.yearOfBirth);
+}
+
+Person.prototype.lastname = "Smith";
+
+var john = new Person("John", 1990, "developer");
+var jane = new Person("Jane", 1980, "designer");
+var steve = new Person("Steve", 1970, "sales");
+```
