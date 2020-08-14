@@ -228,13 +228,189 @@ var Person = function(name, yearOfBirth, job){
   this.job = job;
 }
 
+// Only the prototype needs this, not each object
 Person.prototype.calculateAge = function(){
   console.log(2020 - this.yearOfBirth);
 }
 
+// You can use the same for properties but its less common
 Person.prototype.lastname = "Smith";
 
 var john = new Person("John", 1990, "developer");
 var jane = new Person("Jane", 1980, "designer");
 var steve = new Person("Steve", 1970, "sales");
+
+
+john instanceof Person; //true
+
+john.__proto__ === Person.prototype; //true
+john.__proto__ === jane.__proto__; //true
+
+john.hasOwnProperty('job'); //true
+john.hasOwnProperty('lastname'); //false
+
+```
+
+How to inspect objects
+```javascript
+console.info([1,2,3])
+```
+
+
+### `Object.create` to create new objects
+- First define the object that act as the prototype
+- Then create an object based on that very prototype
+
+
+```javascript
+// Note that this is no longer a fn constructor
+var personProto = {
+  calculaeAge: function(){
+    console.log(2020 - this.yearOfBirth);
+  }
+}
+
+var john = Object.create(personProto);
+john.name = "John";
+john.yearOfBirth = 1990;
+john.job = "dev";
+
+var jane = Object.create(personProto, {
+  name: { value: "Jane"},
+  yearOfBirth: { value: 2000},
+  job: { value: "designer"},
+});
+
+```
+
+### Object.create vs Fn prototype 
+- Obj.create builds an object that directly inherits from the one that we've passed into the first argument
+- In Fn constructor, the newly created obj inherits from the fn constructor's prototype property
+
+
+### Primitives and Objects
+- Variables containing primitives contain their value inside the variable itself.
+- Vars associated with objects do not contain that object, but instead contain a reference to a place in memory where the obj is stored
+
+```javascript
+var a = 23;
+var b = a;
+a = 46;
+
+console.log(a); // 46
+console.log(b); // 23
+```
+
+```javascript
+var a = { name: "John" };
+var b = a;
+
+a.name = "Jane";
+
+console.log(a); // Jane
+console.log(b); // Jane
+```
+
+```javascript
+var a = 23;
+var b = {name: "John"}
+
+function change(x, y){
+  x = 46;
+  y.name = "Jane";
+}
+
+change(a, b);
+
+console.log(a);
+console.log(b);
+
+```
+
+### Function
+- Fn are instances of obj type
+- Fn behaves like any other obj
+- We can store fn in a var
+- We can pass fn as args to another fn
+- We can return a fn from a fn
+- So we say in JS fn are first class objects
+
+
+### Immediately invoked fn expressions
+
+- Not for reusability, but for data privacy
+- IIFE hides vars from the current context
+- With IIFE you dont need to define a new fn and keep it in memory
+- It involves creating a fn expression and invoking it immediately
+```javascript
+  (function(){
+    // Code
+  })() // Call this at the end!
+```
+- An anonymous fn is defined and wrapped in paranthesis
+- The paranthesis around the fn def tricks the parser into believing this is an expression and not a declaration
+- Without this wrapping paranthesis, the parser would break because there is no name
+- Also immediately invoke the fn with a succeeding paranthesis open and close
+
+```javascript
+(function(goodLuck) {
+    if ( ((Math.random() * 10) + goodLuck) >= 5 ) {
+      console.log("Winner!")
+    }
+})(3)
+```
+
+### Closures
+
+- An inner fn always has access to the vars and params defined in it's outer fn, **even after the outer fn has returned**!
+
+```javascript
+function retirement(ageLimit) {
+  var template = " years left":
+  return function(age){
+    console.log( (ageLimit - age) + template)
+  } 
+}
+
+retirementIndia = retirement(68);
+retirementIndia(20);
+```
+- Scope stays intact and variables stay on execution stack (?) even after outer fn excon is popped.
+- This can be accessed by inner fn
+- In the following 
+![picture 1](images/919cc01eb6131a16c8eb2ca4c7a5d8c82a336308865d3b12475661f5b66a1331.png)  
+
+### `call`,`apply` and `bind`
+
+- `call` is used for method borrowing
+- `apply` is the same but uses an array instead of accepting multiple args
+- `bind` creates a copy of the fn with the passed in arguments as default args
+
+```javascript
+var john = {
+  name: "John",
+  greeting: function(style, timeOfDay){
+    if (style == "formal") {
+      console.log("Good " + timeOfDay + " everyone. My name is " + this.name );
+    } else if (style == "friendly") {
+      console.log("What's up? I'm " + this.name + ". What're  you upto this " + timeOfDay + "?");
+    } 
+  }
+}
+
+john.greeting("friendly", "morning");
+
+jane = { name:"Jane" }
+
+// The first arg is what `this` should be mapped to. All other args are fn args.
+john.greeting.call(jane, "formal", "evening")
+
+// Same for `apply`, but all args are passed in as an array
+john.greeting.apply(jane, ["formal", "night"])
+
+// Bind creates a copy of the fn with the default args as passed in
+var johnFormal = john.greeting.bind(john, "formal")
+johnFormal("day");
+
+
 ```
