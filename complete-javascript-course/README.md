@@ -411,6 +411,36 @@ john.greeting.apply(jane, ["formal", "night"])
 // Bind creates a copy of the fn with the default args as passed in
 var johnFormal = john.greeting.bind(john, "formal")
 johnFormal("day");
+```
 
+### Budgety App
+- Separate modules based on responsibility
+- BudgetController does not depend on UI Controller
+- So even with an updated UI need not change anything in BudgetController
+- All classes are created as IIFE for data privacy
+- The overall layout is as follows
+
+```javascript
+
+var BudgetController = (function(){
+  //code
+})();
+
+var UIController = (function(){
+  //code
+})();
+
+var AppController = (function(UICtrl, BudgetCrtrl){
+  // Notice that the args have different names so that if we ever change
+  // the name of the `UIController` class, we don't need to update it in here 
+
+  return {
+    init: function(){
+      // Main 
+    }
+  }
+})(UIController, BudgetController);
+
+AppController.init()
 
 ```
