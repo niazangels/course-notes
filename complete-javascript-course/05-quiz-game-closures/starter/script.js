@@ -21,38 +21,62 @@
         ],
         new: function () {
             var idx = Math.floor(Math.random() * this.data.length);
-            return this.data[idx];
+            this.currentQuestion = this.data[idx];
+
+            // Shuffle options
+            var L = this.currentQuestion.o.length;
+            var pivot = Math.random() * L;
+            var options = this.currentQuestion.o;
+            this.currentQuestion.o = options.slice(pivot, L).concat(options.slice(0, pivot)
+
+            );
         },
-        displayQuestion: function (question) {
-            console.log("Q. " + question.q)
+        displayQuestion: function () {
+            console.log("Q. " + this.currentQuestion.q)
             console.log("===================================================")
-            for (i = 0; i < question.o.length; i++) {
-                console.log(i + ": " + question.o[i])
+            for (i = 0; i < this.currentQuestion.o.length; i++) {
+                console.log(i + ": " + this.currentQuestion.o[i])
             }
         }
     }
 
-    score = 0;
+    function keepScore() {
+        var sc = 0;
+        return function score(correct) {
+            if (correct) {
+                sc += 50;
+                return sc;
+            } else {
+                return sc;
+            }
+        }
+    }
+
+    function checkAnswer(userInput, callback) {
+        userInput = parseInt(userInput);
+
+        if (questions.currentQuestion.o[userInput] == questions.currentQuestion.a) {
+            message = "^_^ Sahi jawab! ";
+            score = callback(true);
+        } else {
+            message = "x_x Galat hei";
+            score = callback(false);
+        }
+
+    }
+
     console.log("Welcome to Kaun Banega Crorepati!")
     console.log("Choose the answer or enter `exit` to quit game");
 
+    var scoreKeeper = keepScore();
     while (true) {
-        currentQuestion = questions.new();
-        questions.displayQuestion(currentQuestion);
+        questions.new();
+        questions.displayQuestion();
         var userInput = prompt("Final answer: ");
-
         if (userInput.toLowerCase() === "exit") {
             break;
-        } else {
-            userInput = parseInt(userInput);
         }
-
-        if (userInput === currentQuestion.o.indexOf(currentQuestion.a)) {
-            message = "^_^ Sahi jawab! "
-            score += 50;
-        } else {
-            message = "x_x Galat hei"
-        }
+        checkAnswer(userInput, scoreKeeper)
         console.log("********* " + message + "(Score: " + score + ") **********")
     }
 })()
