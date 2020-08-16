@@ -444,3 +444,8 @@ var AppController = (function(UICtrl, BudgetCrtrl){
 AppController.init()
 
 ```
+
+- To convert list to Array:
+```javascript
+var arr = Array.prototype.slice.call(list)
+``
