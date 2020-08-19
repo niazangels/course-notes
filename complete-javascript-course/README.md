@@ -448,4 +448,23 @@ AppController.init()
 - To convert list to Array:
 ```javascript
 var arr = Array.prototype.slice.call(list)
-``
+```
+
+### Event delegation
+
+- An event is triggered on some DOM element, but its also fired for all its parent elements one at a time upto and including the root element
+- Event bubbles up in the dom tree
+- The target element is stored as a property in the event, so all parent elements will also know the target element
+- We can attach an event handler to the parent element and wait for the event to bubble up
+- This is called Event delegation
+- Why do we need event delegation?
+  - Lots of child elements
+  - Ev handler for an element that's not yet in the DOM
+
+
+### More array methods
+- Difference between `.map` and `.forEach` is that `map` returns a new item for each current
+- `arr.splice(startinIndex, noOfElementsToRemove)`
+
+### Adding and removing nodes to UI
+- You can only remove a child. So if you want to delete an element, you need to `element.parentNode.removeChild(element)` 
