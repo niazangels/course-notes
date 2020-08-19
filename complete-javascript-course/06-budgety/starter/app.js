@@ -6,6 +6,10 @@ var BudgetController = (function () {
         this.val = val;
     };
 
+    Expense.prototype.calcPercentage = function (totalIncome) {
+        this.percentage = Math.round((this.val / totalIncome) * 100)
+    }
+
     var Income = function (id, desc, val) {
         this.id = id;
         this.desc = desc;
@@ -86,6 +90,16 @@ var BudgetController = (function () {
                 exp_percentage: data.exp_percentage
             }
         },
+        calcPercentages: function () {
+            data.items['exp'].forEach(function (current) {
+                current.calcPercentage(data.totals['inc']);
+            });
+        },
+        getPercentages: function () {
+            return data.items['exp'].map(function (current) {
+                return current.percentage;
+            });
+        },
         test: function () {
             console.log(data);
         }
@@ -106,6 +120,8 @@ var UIController = (function () {
         exp_percentage: document.querySelector(".budget__expenses--percentage"),
         budget: document.querySelector(".budget__value"),
         container: document.querySelector(".container"),
+        percentagesLabel: ".item__percentage",
+
     }
     return {
         DOM: DOM,
@@ -171,6 +187,18 @@ var UIController = (function () {
                 DOM.exp_percentage.textContent = "--";
 
             }
+        },
+        updatePercentages: function (percentages) {
+            var dom_percentages = document.querySelectorAll(DOM.percentagesLabel);
+
+            function nodeForEach(nodeList, callback) {
+                for (i = 0; i < nodeList.length; i++) {
+                    callback(nodeList[i], i)
+                }
+            }
+            nodeForEach(dom_percentages, function (node, index) {
+                node.textContent = percentages[index] + '%';
+            });
         }
     }
 })()
@@ -249,6 +277,8 @@ var AppController = (function (budgetCtrl, UICtrl) {
         var currentBudget;
         currentBudget = budgetCtrl.getBudget();
         UICtrl.updateBudget(currentBudget);
+        budgetCtrl.calcPercentages();
+        UICtrl.updatePercentages(budgetCtrl.getPercentages())
     }
 
 })(BudgetController, UIController);
