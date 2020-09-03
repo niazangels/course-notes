@@ -468,3 +468,86 @@ var arr = Array.prototype.slice.call(list)
 
 ### Adding and removing nodes to UI
 - You can only remove a child. So if you want to delete an element, you need to `element.parentNode.removeChild(element)` 
+
+
+## Section 7: Intro to ES6 / ES2015
+
+### let vs var vs const
+- `var` is function or window scoped. There is no notion of block scopes in `var`.
+- `let` is block scoped. This means even within a fn it is inaccessible outside the block
+- `const` cannot be changed after assignment
+
+```javascript
+function varTest(condition){
+  if (condition){
+    var name = "Niyas";
+    var yob = 1990;
+  }
+  console.log(name + " was born in " + yob);
+}
+
+varTest(true); // Niyas was born in 1990
+```
+
+```javascript
+function letconstTest(condition){
+  if (condition){
+    console.log(name) // Uncaught ReferenceError: Cannot access 'name' before initialization
+    // This is called temporal deadzone. The variables are hoisted but we cannot access them yet.
+    let name = "Niyas";
+    const yob = 1990;
+  }
+  console.log(name); // undefined (because now the scope changed and its treated as a var)
+  console.log(yob); // Uncaught ReferenceError: yob is not defined
+}
+
+letconstTest(true); // 
+```
+
+
+### Blocks & IIFE
+- blocks are a much simpler way to achieve data privacy
+- Simply enclose code in curly braces
+
+```javascript
+  {
+    const a = 1;
+    let b = 2;
+    var c = 3;
+   
+   console.log( a + b ) // 3
+  }
+    console.log( a + b ) // Uncaught Reference error: a is not defined
+   console.log(c) // 3, because var is function scoped, not block scoped
+
+```
+
+### Strings
+- Template literals
+  - Ensclose string in backticks
+  - Encapsulate variables or expression in curly braces with a dollar in front
+- Methods
+  - `string`.startsWith
+  - `string`.endsWith
+  - `string`.includes
+  - `string`.repeat(4)
+
+```javascript
+let firstName = "John";
+let lastName = "Smith";
+
+console.log(`The person is ${firstName} ${lastName}(${calculateAge(1990)})`)
+```
+
+### Arrow functions
+```javascript
+const years = [1990, 1992, 1997, 2000]
+
+// ES5
+var ages = years.map(function(el){
+  return 2020 - year;
+})
+
+// ES6 
+let ages = years.map(el => 2020 - el);
+```
