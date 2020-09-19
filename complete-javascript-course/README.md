@@ -551,3 +551,455 @@ var ages = years.map(function(el){
 // ES6 
 let ages = years.map(el => 2020 - el);
 ```
+
+- Again, only method calls have access to the object via `this`
+- Any regular fn, or a callback fn defined inside a method, or an anonymous fn inside a `.map` does not have access to the obj- it's `this` refs to the window obj
+
+
+#### An example
+
+```javascript
+var box_es5 = {
+  color: 'green',
+  position: 1,
+  clickMe: function(){
+    document.querySelector('.green').addEventListener('click', 
+    function(){
+      // the following will ref to window.color and will be undefined
+      var msg = `${this.color} box is in pos no. ${this.position}`;
+      alert(msg);
+    })
+  }
+}
+
+box_es5.clickMe()
+```
+
+Here's a workaround:
+```javascript
+var box_es5_w = {
+  color: 'green',
+  position: 1,
+  clickMe: function(){
+    // Scope `this` to a var
+    var self = this;
+    document.querySelector('.green').addEventListener('click', 
+    function(){
+      // Use the scoped var
+      var msg = `${self.color} box is in pos no. ${self.position}`
+    })
+  }
+}
+
+box_es5_w.clickMe();
+```
+
+```javascript
+const box_es6 = {
+  color: 'blue',
+  position: 2,
+  clickMe: function(){
+    document.querySelector('.green').addEventListener('click', 
+      () =>{
+        // `this` is shared by its surrounding
+        let msg = `${this.color} box is in pos no. ${this.position}`;
+        alert(msg);
+      })
+  }
+}
+
+box_es6.clickMe();
+```
+
+- Here's an extreme version that doesnt work as expected
+```javascript
+const box_es6_nw = {
+  color: 'blue',
+  position: 2,
+  // Reducing the below to an arrow fn will mean that `this`
+  // will refer to the global context again
+  clickMe: () => {
+    document.querySelector('.green').addEventListener('click', 
+      () =>{
+        // The following will thus give `undefined`
+        let msg = `${this.color} box is in pos no. ${this.position}`;
+        alert(msg);
+      })
+  }
+}
+
+box_es6_nw.clickMe();
+```
+
+#### Another example
+
+```javascript
+function Person(name){
+  this.name = name 
+}
+
+// ES 5 
+Person.prototype.friends_es5 = function(friends) {
+  var arr = friends.map(
+    function(el){
+    // The following won't work because current scope is an 
+    // anonymous fn which has global scope
+    return `${el} is friends with ${this.name}`; }
+  )
+  console.log(arr);
+}
+
+// ES 5 - Workaround
+Person.prototype.friends_es5_w = function(friends) {
+  var arr = friends.map(
+    function(el){
+      return `${el} is friends with ${this.name}`
+    // Now we can bind `this` within `Person.prototype.friends_es5_w` to this inside the anon fn  
+    }.bind(this)
+  );
+  console.log(arr);
+}
+
+// ES 6
+Person.prototype.friends_es6 = friends => {
+  let arr = friends.map(el => { return `${el} is friends with ${this.name}`});
+  console.log(arr);
+}
+```
+
+
+### Destructuring
+```javascript
+const [name, age] = ["John", 26];
+
+const person = {
+  name: "Niyas",
+  age: 26
+}
+
+const {name, age} = person;
+console.log(name, age); 
+
+// Renaming
+const {name: playerName, age: playerAge} = person;
+console.log(playerName, playerAge); 
+```
+
+## Arrays
+
+- Now there's a `Array.from` to convert a nodelist into an arra (instead of the Array.prototype.slice hack)
+  ```javascript
+  Array.from(nodelist).forEach(el => {el.style.backgroundColor = 'dodgerblue'})
+  ```
+  
+- In ES5 `Array.prototype.forEach` / `map` you cannot break/continue
+- Here's an alternative to the following
+
+```javascript
+// ES5
+var boxes = document.querySelectorAll('.box');
+var boxes_arr = Array.prototype.slice.call(boxes);
+
+for (var i=0; i< boxes_arr.length; i++){
+  if (boxes_arr[i].className === 'box blue'){
+    continue;
+  }
+  boxes_arr[i].style.backgroundColor = "dodgerblue"
+  boxes_arr[i].textContent = "I have turned blue";
+}
+
+
+// ES6
+const boxes = Array.from(document.querySelectorAll('.box'));
+for (const box of boxes){
+  if (box.className.includes("blue")){
+    continue;
+  }
+  box.style.backgroundColor = "dodgerblue";
+  box.textContent = "I have turned blue";
+}
+```
+
+- Funnny thing: `boxes` and `box` are both const in the above example, but the box items are being modified. How is this possible?
+
+#### Array.find , Array.findIndex
+
+```javascript
+// ES5
+var ages = [2, 4, 6, 7, 21, 12, 14];
+var over_18 = ages.map(function(el) {
+  return el > 18;
+})
+var idx_over18 = over_18.indexOf(true);
+var val_over18 = ages[idx_over18];
+console.log(val_over18);
+
+// ES6
+const ages = [2, 4, 6, 7, 21, 12, 14];
+const idx_over18 = ages.findIndex(el => el >= 18);
+const val_over18 = ages.find(el => el >= 18);
+
+console.log(idx_over18);
+console.log(val_over18);
+```
+
+### Spread operator (unpacking)
+
+```javascript
+function add4(a, b, c, d){
+  return a + b + c+ d;
+}
+console.log(add4(1,2,3,4));
+
+// ES5
+var values = [1,2,3,4];
+// We pass null because we aren't interested in setting `this`
+var ans = add4.apply(null, values);
+console.log(ans)
+
+// ES6
+const values = [1,2,3,4];
+console.log(add4(...values));
+```
+
+```javascript
+const h = document.querySelector('h1');
+const boxes = document.querySelectorAll('.box');
+const all = [h, ...boxes];
+```
+
+### Rest parameters (opp. of spread parameter)
+- Each fn gets access to an `arguments` variable
+
+```javascript
+// es5
+
+// Notice we do not define fn parameters
+function isFullAge_es5(){
+  var args = Array.prototype.slice.call(arguments);
+  args.forEach(function(el){
+    console.log((2020 - el) > 18);
+  })
+}
+
+isFullAge_es5(1960, 2018, 1950, 2012);
+
+// ES6
+function isFullAge_es6(...args){
+  args.forEach(el => { console.log((2020 - el) > 18); })
+}
+isFullAge_es6(1960, 2018, 1950, 2012);
+```
+
+- Suppose we want to specify the full age:
+
+```javascript
+// es5
+
+// Now we pass in just the limit as the fn parameter
+function isFullAge_es5(limit){
+  // Slice starting from the 1st position of arguments
+  var args = Array.prototype.slice.call(arguments,1);
+  args.forEach(function(el){
+    console.log((2020 - el) > limit);
+  })
+}
+
+isFullAge_es5(20, 1960, 2018, 1950, 2012);
+
+// ES6
+function isFullAge_es6(limit, ...args){
+  args.forEach(el => { console.log((2020 - el) > limit); })
+}
+isFullAge_es6(20, 1960, 2018, 1950, 2012);
+```
+
+### Default parameters
+
+```javascript
+
+// ES5
+
+function SmithPerson(firstName, age, lastName, nationality){
+  
+  lastname = (lastName === undefined ? "Smith" : lastName);
+  nationality = (nationality === undefined ? "Indian" : nationality);
+  
+  this.firstName = firstName;
+  this.lastName = lastName;
+  this.age = age;
+  this.nationality = nationality;
+}
+
+john = new SmithPerson("John", 28);
+
+
+// ES5
+
+function SmithPerson(firstName, age, lastName='Smith', nationality='Austrian'){
+  this.firstName = firstName;
+  this.lastName = lastName;
+  this.age = age;
+  this.nationality = nationality;
+}
+
+jane = new SmithPerson("Jane", 28);
+```
+
+### Maps
+- Hashmaps
+- In ES5 we had to use Objects if we ever wanted to keep a dict/hashmap
+- Now in ES6, maps fill this gap
+- **In objs, we're limited to string type for keys. But in maps, we can use anything (even fn and objs)**
+- You can also iterate through maps which cant be done in objs
+
+
+```javascript
+const question = new Map();
+question.set("q", "What is the capital of India?");
+question.set(true, "Delhi");
+question.set(1, "Trivandrum");
+question.set("three", "Lucknow");
+
+console.log(question.size);
+
+question.delete("three");
+console.log(question.size);
+console.log(question.has("three"));
+
+// question.clear();
+
+question.forEach((val, key)=>{
+  console.log(`${key} : ${val}`);
+})
+
+
+for (let [val,key] of question) {
+  console.log(`${key} => ${val}`);
+}
+
+
+// Notice the order changes when we use `.entries()`
+for (let [key, value] of question.entries()) {
+  console.log(`${key} => ${val}`);
+}
+
+```
+
+### Classes
+
+- Syntactic sugar around fn constructors
+- Class definitions are not hoisted, so unlike fn constructors, we need to implement the class and only later can we use them
+- We can only add methods to classes, and not properties (and inheriting propeties through obj instances is not best practice anyway)
+```javascript
+
+// ES5
+var Person_es5 = function (firstName, lastName, yob){
+   this.firstName = firstName;
+   this.lastName = lastName;
+   this.yob = yob;
+ }
+
+ Person_es5.prototype.calculate_age = function(){
+   var age = new Date().getFullYear - this.yob;
+   console.log(age);
+ }
+
+var john = new Person_es5("John", "Smith", 26);
+
+// ES6
+class Person_es6 {
+  // Every class requires a constructor
+  constructor(firstName, lastName, yob){
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.yob = yob;
+  }
+  // There are no commas, semi colons etc. in between
+  calculate_age(){
+    var age = new Date().getFullYear - this.yob;
+    console.log(age);
+  }
+
+  static greeting(){
+    console.log("Hey there! ✌")
+  }
+}
+
+var jane = new Person_es6("Jane", "Smooth", 24);
+Person_es6.greeting();
+```
+
+### Subclassing and inheritence
+
+```javascript
+// ES5
+var Person_es5 = function (name, yearOfBirth, job){
+   this.name = name;
+   this.yearOfBirth = yearOfBirth;
+   this.job = job;
+ }
+
+ Person_es5.prototype.calculate_age = function(){
+   var age = new Date().getFullYear() - this.yearOfBirth;
+   console.log(age);
+ }
+
+var Athlete_es5 = function(name, yearOfBirth, job, olympicGames, medals){
+  // Pass the current object to the Person_es5
+  Person_es5.call(this, name, yearOfBirth, job);
+  this.olympicGames = olympicGames;
+  this.medals = medals;
+}
+
+// The following won't work
+// Athlete_es5.prototype = Person_es5
+
+// Object.create helps to manually set the prototype
+// We want the prototype of the Athlete class to be the prototype of the Person class
+Athlete_es5.prototype = Object.create(Person_es5.prototype);
+
+// Once you change the prototype, add the fns
+Athlete_es5.prototype.wonMedal = function(){
+  this.medals ++;
+}
+
+john = new Athlete_es5("John", 2000, "accountant", 10, 0);
+john.calculate_age();
+john.wonMedal();
+john
+```
+
+```javascript
+// ES5
+class Person_es6 {
+ 
+  constructor (name, yearOfBirth, job){
+    this.name = name;
+    this.yearOfBirth = yearOfBirth;
+    this.job = job;
+}
+
+ calculate_age(){
+    var age = new Date().getFullYear() - this.yearOfBirth;
+    console.log(age);
+ }
+}
+
+class Athlete_es6 extends Person_es6{
+  constructor(name, yearOfBirth, job, olympicGames, medals){
+    super(name,yearOfBirth, job)
+    this.olympicGames = olympicGames;
+    this.medals = medals;
+  }
+
+  wonMedal(){
+    this.medals ++;
+  }
+}
+
+john = new Athlete_es6("John", 2000, "accountant", 10, 0);
+john.calculate_age();
+john.wonMedal();
+john
+```
