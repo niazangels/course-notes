@@ -21,3 +21,4 @@
 
 ## Writing
 - 🖥️ [Write a Killer Literature Review](./write-a-killer-literature-review/README.md)
+- 🖥️ [Ninja Writing - Four levels of Writing Mastery](./ninja-writing/README.md)
