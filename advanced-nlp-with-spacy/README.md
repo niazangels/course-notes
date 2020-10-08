@@ -430,15 +430,10 @@ print([(ent.text, ent.label_) for ent in doc.ents])
 - Accessible via the `._` property. This makes it clear that they were added by the user, and not built into spaCy, like `token.text`.
 
 ```py
-from spacy.tokens import Doc, Token, Span
-
-# Set extensions on the Doc, Token and Span
 Doc.set_extension("title", default=None)
 Token.set_extension("is_color", default=False)
 Span.set_extension("has_color", default=False)
-```
 
-```py
 doc._.title = "My document"
 token._.is_color = True
 span._.has_color = False
@@ -459,7 +454,164 @@ doc[3]._.is_color = True
 ```
 
 ### Property extension
+- Define a getter and an optional setter function
+- Getter only called when you retrieve the attribute value
+  - This lets you compute the value dynamically, and even take other custom attributes into account.
 
+```py
+from spacy.tokens import Token
+
+def get_is_color(token):
+    colors = ["red", "yellow", "blue"]
+    return token.text in colors
+
+Token.set_extension("is_color", getter=get_is_color)
+
+doc = nlp("The sky is blue.")
+print(doc[3]._.is_color, "-", doc[3].text)
+```
+
+- `Span` extensions should almost always use a getter.
+  - Otherwise, you'd have to update every possible span ever by hand to set all the values
+
+```py
+from spacy.tokens import Span
+
+def get_has_color(span):
+    colors = ["red", "yellow", "blue"]
+    return any(token.text in colors for token in span)
+
+Span.set_extension("has_color", getter=get_has_color)
+
+doc = nlp("The sky is blue.")
+
+print(doc[1:4]._.has_color, "-", doc[1:4].text)
+print(doc[0:2]._.has_color, "-", doc[0:2].text)
+```
+
+### Method extensions
+- Assign a function that becomes available as an object method
+- Lets you pass one or more arguments to it, and compute attribute values dynamically.
+
+```py
+def has_token(doc, token_text):
+    in_doc = token_text in [token.text for token in doc]
+    return in_doc
+
+Doc.set_extension("has_token", method=has_token)
+
+doc = nlp("The sky is blue.")
+
+print(doc._.has_token("blue"), "- blue")
+print(doc._.has_token("cloud"), "- cloud")
+```
+
+```py
+def to_html(span, tag):
+    return f"<{tag}>{span.text}</{tag}>"
+
+
+Span.set_extension("to_html", method=to_html)
+
+doc = nlp("Hello world, this is a sentence.")
+span = doc[0:2]
+print(span._.to_html("strong"))
+```
+
+```py
+def get_wikipedia_url(span):
+    if span.label_ in ("PERSON", "ORG", "GPE", "LOCATION"):
+        entity_text = span.text.replace(" ", "_")
+        return "https://en.wikipedia.org/w/index.php?search=" + entity_text
+
+Span.set_extension("wikipedia_url" getter=get_wikipedia_url)
+
+```
+
+## Components with extenstions
+
+```py
+def countries_component(doc):
+    matches = matcher(doc)
+    doc.ents = [Span(doc, start, end, label=match_id) for match_id, start, end in matches]
+    return doc
+
+
+nlp.add_pipe(countries_component)
+
+get_capital = lambda span: CAPITALS.get(span.text)
+Span.set_extension("capital", getter=get_capital)
+
+doc = nlp("Czech Republic may help Slovakia protect its airspace")
+print([(ent.text, ent.label_, ent._.capital) for ent in doc.ents])
+```
+
+## Scaling and performance
+### Process large volumes of text
+
+- Use nlp.pipe method
+- Processes texts as a stream, yields Doc objects
+- Much faster than calling nlp on each text because it batches up the texts.
+- BAD
+  - `docs = [nlp(text) for text in LOTS_OF_TEXTS]`
+- BETTER
+  - `docs = list(nlp.pipe(LOTS_OF_TEXTS))`
+
+```py
+for doc in nlp.pipe(TEXTS):
+    print([token.text for token in doc if token.pos_ == "ADJ"])
+```
+
+### Passing in context
+
+- `nlp.pipe` also supports passing in tuples of text / context if you set `as_tuples` to `True`.
+- The method will then yield `(doc, context)` tuples.
+- This is useful for passing in additional metadata, like an ID associated with the text, or a page number.
+
+```py
+data = [
+    ("This is a text", {"id": 1, "page_number": 15}),
+    ("And another text", {"id": 2, "page_number": 16}),
+]
+
+for doc, context in nlp.pipe(data, as_tuples=True):
+    print(doc.text, context["page_number"])
+```
+
+Or you can add it to a custom attribute
+
+```py
+
+Doc.set_extension("id", default=None)
+Doc.set_extension("page_number", default=None)
+
+data = [
+    ("This is a text", {"id": 1, "page_number": 15}),
+    ("And another text", {"id": 2, "page_number": 16}),
+]
+
+for doc, context in nlp.pipe(data, as_tuples=True):
+    doc._.id = context["id"]
+    doc._.page_number = context["page_number"]
+```
+
+### Use only the tokenizer
+- If you only need a tokenized `Doc` object (and not the predictions), you can use the `nlp.make_doc` method instead, which takes a text and returns a doc.
+- This is how spaCy does it behind the scenes
+- BAD
+  - `nlp("Hello World!")`
+- BETTER
+  - `nlp.make_doc("Hello World!")`
+
+
+### Disabling pipeline components
+- Use `nlp.disable_pipes` to temporarily disable one or more pipes
+
+```py
+with nlp.disable_pipes("tagger", "parser"):
+    doc = nlp(text)
+    print(doc.ents)
+```
 
 # Chapter 4
 
