@@ -1,6 +1,13 @@
 # Advanced NLP with spaCy
+- Source: https://course.spacy.io/en
+- Instructor: [Ines Montani](https://twitter.com/_inesmontani)
 
-# Chapter 1
+# References
+- [Customizing the Tokenizer](https://spacy.io/usage/linguistic-features#tokenization)
+- [Training and updating spaCy components](https://spacy.io/usage/training)
+- [Adding/improving support for other languages](https://spacy.io/usage/adding-languages)
+
+# Chapter 1:  Finding words, phrases, names and concepts
 
 ## Introduction to spaCy
 
@@ -344,7 +351,7 @@ matches = matcher(doc)
 print([doc[start:end] for match_id, start, end in matches])
 ```
 
-# Chapter 3 - Processing Pipelines
+# Chapter 3: Processing Pipelines
 
 ## Processing Pipelines
 
@@ -613,7 +620,7 @@ with nlp.disable_pipes("tagger", "parser"):
     print(doc.ents)
 ```
 
-# Chapter 4
+# Chapter 4: Training a neural network model
 
 ## Training and updating models
 - The entity recognizer tags words and phrases in context
@@ -628,8 +635,153 @@ with nlp.disable_pipes("tagger", "parser"):
 `("I need a new phone! Any tips?", {"entities": []})`
 
 - Goal: teach the model to generalize
-- Update an existing model: a few hundred to a few thousand examples
-- Train a new category: a few thousand to a million examples (spaCy's English models: 2 million words)
+- spaCy's English models: 
+  - 2 million words
+- Update an existing model: 
+  - a **few hundred to a few thousand examples**
+- Train a new category: 
+  - a **few thousand to a million examples** 
 - Usually created manually by human annotators
-- Can be semi-automated – for example, using spaCy's Matcher
-- 
+- Can be semi-automated – for example, using spaCy's `Matcher`
+
+```py
+pattern1 = [{"LOWER": "iphone"}, {"LOWER": "x"}]
+pattern2 = [{"LOWER": "iphone"}, {"IS_DIGIT": True}]
+matcher.add("GADGET", None, pattern1, pattern2)
+
+TRAINING_DATA = []
+
+for doc in nlp.pipe(TEXTS):
+    spans = [doc[start:end] for match_id, start, end in matcher(doc)]
+    entities = [(span.start_char, span.end_char, "GADGET") for span in spans]
+    training_example = (doc.text, {"entities": entities})
+    TRAINING_DATA.append(training_example)
+```
+
+## The training loop
+
+- spaCy gives you full control over the training loop
+- 10 iterations = 10 loops
+- randomly shuffle the data for each iteration
+  - to prevent the model from getting stuck in a suboptimal solution
+- Next, we divide the training data into batches of several examples, also known as minibatching. 
+  - This increases the reliability of the gradient estimates.
+- Update the model for each batch, and start the loop again until we've reached the last iteration.
+
+## Setting up the pipeline
+
+```py
+nlp = spacy.blank("en")
+
+ner = nlp.create_pipe("ner")
+nlp.add_pipe(ner)
+
+ner.add_label("GADGET")
+```
+
+## Building a training loop
+
+- `nlp.begin_training`: Allocate models, pre-process training data and acquire an optimizer. [[Docs]](https://spacy.io/api/language#begin_training)
+
+```py
+# Data: 
+# [
+#   [
+#      'How to preorder the iPhone X', {'entities': [[20, 28, 'GADGET']]}
+#    ],
+#   ...
+# ]
+
+nlp = spacy.blank("en")
+ner = nlp.create_pipe("ner")
+nlp.add_pipe(ner)
+ner.add_label("GADGET")
+
+nlp.begin_training()
+
+losses = {}
+
+for itn in range(10):
+    random.shuffle(TRAINING_DATA)
+
+    for batch in spacy.util.minibatch(TRAINING_DATA, size=2):
+        
+        texts = [text for text, entities in batch]
+        annotations = [entities for text, entities in batch]
+
+        nlp.update(texts, annotations, losses=losses)
+    print(losses)
+```
+
+## Best practices
+
+### Problem 1: Models can "forget" things
+
+- Existing model can overfit on new data
+  - e.g.: if you only update it with `WEBSITE`, it can "unlearn" what a `PERSON` is
+  - Also known as **catastrophic forgetting**
+
+### Solution 1: Mix in previously correct predictions
+
+  - For example, if you're training `WEBSITE`, also include examples of `PERSON`
+  - Run existing spaCy model over data and extract all other relevant entities
+- **BAD**
+  - ```py 
+      TRAINING_DATA = [
+        ("Reddit is a website", {"entities": [(0, 6, "WEBSITE")]})
+      ]
+    ```
+
+- **GOOD**
+  -  ```python
+      TRAINING_DATA = [
+          ("Reddit is a website", {"entities": [(0, 6, "WEBSITE")]}),
+          ("Obama is a person", {"entities": [(0, 5, "PERSON")]})
+      ]
+      ```
+    
+### Problem 2: Models can't learn everything
+
+- spaCy's models make predictions based on local context
+  - Model can struggle to learn if decision is difficult to make based on context
+  - Label scheme needs to be consistent and not too specific
+  - For example: `CLOTHING` is better than `ADULT_CLOTHING` and `CHILDRENS_CLOTHING`
+
+### Solution 2: Plan your label scheme carefully
+
+- Pick categories that are reflected in local context
+- More generic is better than too specific
+- If the decision is difficult to make based on the context, the model can struggle to learn it.
+- Use rules to go from generic labels to specific categories
+
+- BAD:
+
+  ```python
+  LABELS = ["ADULT_SHOES", "CHILDRENS_SHOES", "BANDS_I_LIKE"]
+  ```
+
+- GOOD:
+  ```python
+  LABELS = ["CLOTHING", "BAND"]
+  ``` 
+
+
+  - BAD
+    - ```py
+      TRAINING_DATA = [
+        (
+            "i went to amsterdem last year and the canals were beautiful",
+            {"entities": [(10, 19, "TOURIST_DESTINATION")]},
+        ),
+        (
+            "You should visit Paris once in your life, but the Eiffel Tower is kinda boring",
+            {"entities": [(17, 22, "TOURIST_DESTINATION")]},
+        ),
+        ("There's also a Paris in Arkansas, lol", {"entities": []}),
+        (
+            "Berlin is perfect for summer holiday: lots of parks, great nightlife, cheap beer!",
+            {"entities": [(0, 6, "TOURIST_DESTINATION")]},
+        ),
+      ]
+      ```
+    - A much better approach would be to only label "GPE" (geopolitical entity) or "LOCATION" and then use a rule-based system to determine whether the entity is a tourist destination in this context. For example, **you could resolve the entities types back to a knowledge base or look them up in a travel wiki**.
