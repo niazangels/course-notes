@@ -1,17 +1,10 @@
 # Advanced NLP with spaCy
-- Source: https://course.spacy.io/en
-- Instructor: [Ines Montani](https://twitter.com/_inesmontani)
 
-# References
-- [Customizing the Tokenizer](https://spacy.io/usage/linguistic-features#tokenization)
-- [Training and updating spaCy components](https://spacy.io/usage/training)
-- [Adding/improving support for other languages](https://spacy.io/usage/adding-languages)
+## Chapter 1
 
-# Chapter 1:  Finding words, phrases, names and concepts
+### Introduction to spaCy
 
-## Introduction to spaCy
-
-### The nlp object
+#### The nlp object
 ```python
   from spacy.lang.en import English
   nlp = English()
@@ -19,25 +12,25 @@
 - variable containing the processing pipeline
 - includes language specific rules for tokenization etc. (@niazangels: what do you mean "etc")
 
-### The Doc object
+#### The Doc object
 - When you process a text with the nlp object, spaCy creates a Doc object – short for "document". 
 - The Doc lets you access information about the text in a structured way, and **no information is lost**.
 - The Doc behaves like a normal Python sequence and lets you iterate over its tokens
 
-### The Token object
+#### The Token object
 - `Token` objects represent the tokens in a document – for example, a word or a punctuation character.
 - Token objects provide various attributes containing information about the tokens.
 
-### The Span object
+#### The Span object
 - A `Span` object is a slice of the document consisting of one or more tokens. It's only a view of the `Doc` and doesn't contain any data itself.
 - Slicing a `Doc` will return a `Span`
 
-### Lexical attributes
+#### Lexical attributes
 - refer to the entry in the vocabulary and don't depend on the token's context
 - `is_alpha`, `is_digit`, `is_punct`, `like_num`
 
 
-## Statistical Models
+### Statistical Models
 
 - Enable spaCy to predict linguistic attributes in context
     - Part-of-speech tags
@@ -46,7 +39,7 @@
 - **Trained on labeled example texts**
 - Can be updated with more examples to fine-tune predictions
 
-### Model packages
+#### Model packages
 `$ python -m spacy download en_core_web_sm`
 
 ```python
@@ -60,14 +53,14 @@ nlp = spacy.load("en_core_web_sm")
 - The `spacy.load` method loads a model package by name and returns an nlp object.
 
 
-### Part of Speech
+#### Part of Speech
 ```python
 for token in doc:
     print(token.text, token.pos_)
 ```
 - **Attributes that return strings usually end with an underscore** – attributes without the underscore return an integer ID value.
 
-### Predicting Syntactic Dependencies
+#### Predicting Syntactic Dependencies
 ```python
 for token in doc:
     print(token.text, token.pos_, token.dep_, token.head.text)
@@ -77,27 +70,27 @@ for token in doc:
 
 - The `.head` attribute returns the syntactic head token (parent token this word is attached to).
 
-### Dependencies Label Scheme
+#### Dependencies Label Scheme
 - To describe syntactic dependencies, spaCy uses a standardized label scheme. Here's an example of some common labels:
 
 ![picture 2](images/4ffca72dfd6ca5536a73239ea31ed2971c202ee3d4a4694d092eb33ccf79aaa5.png)  
 
-### Predicting Named Entities
+#### Predicting Named Entities
 ```python
 for ent in doc.ents:
     print(ent.text, ent.label_)
 ```
 - Tip: Use `spacy.explain("GPE")` to get expansions
 
-## Rule based matching
+### Rule based matching
 
-### Why not just regular expressions
+#### Why not just regular expressions
 - Match on `Doc` objects, not just strings
 - Match on tokens and token attributes
 - Use the model's predictions
 - Example: "duck" (verb) vs. "duck" (noun)
 
-### Match patterns
+#### Match patterns
 
 
 - Lists of dictionaries, one per token
@@ -116,7 +109,7 @@ for ent in doc.ents:
         `[{"LEMMA": "buy"}, {"POS": "NOUN"}]`
 
 
-### Using Matcher
+#### Using Matcher
 
 ```python
 import spacy
@@ -155,7 +148,7 @@ pattern = [ {"LEMMA": "love", "POS": "VERB"},
 doc = nlp("I loved dogs but now I love cats more.")
 ```
 
-### Operators and Quantifiers
+#### Operators and Quantifiers
 
 ![picture 3](images/e46a9c3b77f46e6a66cc67a1a8d60f75b43d40a2ca59c92fcfd5bd1fee222f4a.png)  
 
@@ -169,11 +162,11 @@ pattern = [
 doc = nlp("I [ bought a smartphone ]. Now I'm [ buying apps ] .")
 ```
 
-# Chapter 2: Large-scale data analytics with spaCy
+## Chapter 2: Large-scale data analytics with spaCy
 
-## Data Structures
+### Data Structures
 
-### Shared vocab and string store
+#### Shared vocab and string store
 - `Vocab`: stores data shared across multiple documents
 - To save memory, spaCy encodes all strings to hash values
 - Strings are only stored once in the StringStore via nlp.vocab.strings
@@ -184,13 +177,13 @@ coffee_hash = nlp.vocab.strings["coffee"]
 coffee_string = nlp.vocab.strings[coffee_hash]
 ```
 
-### Lexemes: entries in vocabulary
+#### Lexemes: entries in vocabulary
 ```py
 doc = nlp("I love coffee")
 lexeme = nlp.vocab["coffee"]
 
 print(lexeme.text, lexeme.orth, lexeme.is_alpha)
-# coffee 3197928453018144401 True
+## coffee 3197928453018144401 True
 ```
 - A `Lexeme` object is an entry in the vocabulary
 - Contains the context-independent information about a word
@@ -200,7 +193,7 @@ print(lexeme.text, lexeme.orth, lexeme.is_alpha)
 
 ![picture 4](images/cb747be085732c76b2d4b22ab14cbf40d16e6836da6c071e9bf0b6530f0d7877.png)  
 
-### The Doc object
+#### The Doc object
 
 ```py
 words = ["Hello", "world", "!"]
@@ -209,7 +202,7 @@ spaces = [True, False, False]
 doc = Doc(nlp.vocab, words=words, spaces=spaces)
 ```
 
-### The Span object
+#### The Span object
 
 ![picture 5](images/3e1d54c4eb80f823aa973ded734794e46b4ef5de2dc1eec5b1aa28bc9490b009.png)  
 
@@ -218,21 +211,21 @@ doc = Doc(nlp.vocab, words=words, spaces=spaces)
 ```py
 span = Span(doc, 0, 2)
 
-# Create a span with a label
+## Create a span with a label
 span_with_label = Span(doc, 0, 2, label="GREETING")
 
-# Overwrite the doc.ents with a list of Spans
+## Overwrite the doc.ents with a list of Spans
 doc.ents = [span_with_label]
 ```
 
-### Best practices
+#### Best practices
 - The Doc and Span are very powerful and optimized for performance. 
 - They give you access to all references and relationships of the words and sentences.
   - **Convert result to strings as late as possible**. If you do it too early, you'll lose all relationships between the tokens.
   - Use token attributes if available – for example, `token.i` for the token index
 - Don't forget to pass in the shared `vocab`
 
-## Word vectors and semantic similarity
+### Word vectors and semantic similarity
 
 - spaCy can compare two objects and predict similarity
 `Doc.similarity()`, `Span.similarity()` and `Token.similarity()`
@@ -279,20 +272,20 @@ doc = nlp("McDonalds sells burgers")
 
 print(span.similarity(doc))
 ```
-### Word vectors 
+#### Word vectors 
 
 ```py
-# 300 dimensional vector
+## 300 dimensional vector
 print(doc[3].vector)
 ```
 
-## Combining models and rules
+### Combining models and rules
 ![picture 6](images/87a739f48f7feff12e851e6ecb2957e3ebb853fc664414b59121c1dfd458031f.png)  
 
 - Detecting product or person names usually benefits from a statistical model.
 - Rule-based approaches on the other hand come in handy if there's a more or less finite number of instances you want to find. For example, **all countries or cities of the world, drug names or even dog breeds**
 
-### Adding statistical predictions
+#### Adding statistical predictions
 ```py
 doc = nlp("I have a Golden Retriever")
 
@@ -305,7 +298,7 @@ for match_id, start, end in matcher(doc):
     print("Root head token:", span.root.head.text)
 ```
 
-### Efficient phrase matching
+#### Efficient phrase matching
 
 - PhraseMatcher like regular expressions or keyword search – but with access to the tokens!
 - Takes Doc object as patterns
@@ -327,7 +320,7 @@ for match_id, start, end in matcher(doc):
     print("Matched span:", span.text)
 ```
 
-### Matching from a list of finite items
+#### Matching from a list of finite items
 
 ```py
 import json
@@ -351,11 +344,11 @@ matches = matcher(doc)
 print([doc[start:end] for match_id, start, end in matches])
 ```
 
-# Chapter 3: Processing Pipelines
+## Chapter 3 - Processing Pipelines
 
-## Processing Pipelines
+### Processing Pipelines
 
-### What happens when you call nlp?
+#### What happens when you call nlp?
 
 ![picture 7](images/10edf3276338d26abeeffed07784c19eea2a8a18bd9db71a7a245d47340ea1d5.png)  
 
@@ -363,7 +356,7 @@ print([doc[start:end] for match_id, start, end in matches])
 - Next, a series of pipeline components is applied to the doc in order. In this case, the tagger, then the parser, then the entity recognizer. 
 - Finally, the processed doc is returned.
 
-### Built in Pipeline
+#### Built in Pipeline
 ![picture 9](images/72b2a20e38c7bf4a1d49101ee1426fe1818b8c931b92ae3147064771486b2f18.png)  
 
 - The part-of-speech tagger sets the token.tag and token.pos attributes.
@@ -374,22 +367,22 @@ print([doc[start:end] for match_id, start, end in matches])
 
 - Finally, the text classifier sets category labels that apply to the whole text, and adds them to the doc.cats property.
 
-### Under the hood
+#### Under the hood
 ![picture 10](images/291d3f02c89c5a74408f2c91e99a4b4d1c767fedd44e3608be6eb998e27aa897.png)  
 
 - Pipeline defined in model's meta.json in order
 - Built-in components need binary data to make predictions
 
-### Pipeline attributes
+#### Pipeline attributes
 - `nlp.pipe_names`: list of pipeline component names
 - `nlp.pipeline`: list of (name, component) tuples 
 
-## Custom Pipeline components
+### Custom Pipeline components
 - Make a function execute automatically when you call nlp
 - Add your own metadata to documents and tokens
 - Updating built-in attributes like doc.ents
 
-### Anatomy of a component
+#### Anatomy of a component
 - Function that takes a doc, modifies it and returns it
 - Can be added using the nlp.add_pipe method
 
@@ -404,7 +397,7 @@ nlp.add_pipe(custom_component)
 ![picture 11](images/970eceed95b6fb7166eb945edcd23572c56359cfb1b346f4d0a5f9f5d4b99c48.png)  
 
 
-### Complex components
+#### Complex components
 
 ```py
 import spacy
@@ -430,8 +423,8 @@ nlp.add_pipe(animal_component, after="ner")
 doc = nlp("I have a cat and a Golden Retriever")
 print([(ent.text, ent.label_) for ent in doc.ents])
 ```
-## Extension attributes
-### Setting custom attributes
+### Extension attributes
+#### Setting custom attributes
 - Add custom metadata to documents, tokens and spans
 - Registered on the global `Doc`, `Token` or `Span` using the `set_extension` method
 - Accessible via the `._` property. This makes it clear that they were added by the user, and not built into spaCy, like `token.text`.
@@ -460,7 +453,7 @@ doc = nlp("The sky is blue.")
 doc[3]._.is_color = True
 ```
 
-### Property extension
+#### Property extension
 - Define a getter and an optional setter function
 - Getter only called when you retrieve the attribute value
   - This lets you compute the value dynamically, and even take other custom attributes into account.
@@ -496,7 +489,7 @@ print(doc[1:4]._.has_color, "-", doc[1:4].text)
 print(doc[0:2]._.has_color, "-", doc[0:2].text)
 ```
 
-### Method extensions
+#### Method extensions
 - Assign a function that becomes available as an object method
 - Lets you pass one or more arguments to it, and compute attribute values dynamically.
 
@@ -535,7 +528,7 @@ Span.set_extension("wikipedia_url" getter=get_wikipedia_url)
 
 ```
 
-## Components with extenstions
+### Components with extenstions
 
 ```py
 def countries_component(doc):
@@ -553,8 +546,8 @@ doc = nlp("Czech Republic may help Slovakia protect its airspace")
 print([(ent.text, ent.label_, ent._.capital) for ent in doc.ents])
 ```
 
-## Scaling and performance
-### Process large volumes of text
+### Scaling and performance
+#### Process large volumes of text
 
 - Use nlp.pipe method
 - Processes texts as a stream, yields Doc objects
@@ -569,7 +562,7 @@ for doc in nlp.pipe(TEXTS):
     print([token.text for token in doc if token.pos_ == "ADJ"])
 ```
 
-### Passing in context
+#### Passing in context
 
 - `nlp.pipe` also supports passing in tuples of text / context if you set `as_tuples` to `True`.
 - The method will then yield `(doc, context)` tuples.
@@ -602,7 +595,7 @@ for doc, context in nlp.pipe(data, as_tuples=True):
     doc._.page_number = context["page_number"]
 ```
 
-### Use only the tokenizer
+#### Use only the tokenizer
 - If you only need a tokenized `Doc` object (and not the predictions), you can use the `nlp.make_doc` method instead, which takes a text and returns a doc.
 - This is how spaCy does it behind the scenes
 - BAD
@@ -611,7 +604,7 @@ for doc, context in nlp.pipe(data, as_tuples=True):
   - `nlp.make_doc("Hello World!")`
 
 
-### Disabling pipeline components
+#### Disabling pipeline components
 - Use `nlp.disable_pipes` to temporarily disable one or more pipes
 
 ```py
@@ -620,9 +613,9 @@ with nlp.disable_pipes("tagger", "parser"):
     print(doc.ents)
 ```
 
-# Chapter 4: Training a neural network model
+## Chapter 4
 
-## Training and updating models
+### Training and updating models
 - The entity recognizer tags words and phrases in context
 - **Entities can't overlap.** Each token can only be part of one entity
 - Examples need to come with context
@@ -635,153 +628,8 @@ with nlp.disable_pipes("tagger", "parser"):
 `("I need a new phone! Any tips?", {"entities": []})`
 
 - Goal: teach the model to generalize
-- spaCy's English models: 
-  - 2 million words
-- Update an existing model: 
-  - a **few hundred to a few thousand examples**
-- Train a new category: 
-  - a **few thousand to a million examples** 
+- Update an existing model: a few hundred to a few thousand examples
+- Train a new category: a few thousand to a million examples (spaCy's English models: 2 million words)
 - Usually created manually by human annotators
-- Can be semi-automated – for example, using spaCy's `Matcher`
-
-```py
-pattern1 = [{"LOWER": "iphone"}, {"LOWER": "x"}]
-pattern2 = [{"LOWER": "iphone"}, {"IS_DIGIT": True}]
-matcher.add("GADGET", None, pattern1, pattern2)
-
-TRAINING_DATA = []
-
-for doc in nlp.pipe(TEXTS):
-    spans = [doc[start:end] for match_id, start, end in matcher(doc)]
-    entities = [(span.start_char, span.end_char, "GADGET") for span in spans]
-    training_example = (doc.text, {"entities": entities})
-    TRAINING_DATA.append(training_example)
-```
-
-## The training loop
-
-- spaCy gives you full control over the training loop
-- 10 iterations = 10 loops
-- randomly shuffle the data for each iteration
-  - to prevent the model from getting stuck in a suboptimal solution
-- Next, we divide the training data into batches of several examples, also known as minibatching. 
-  - This increases the reliability of the gradient estimates.
-- Update the model for each batch, and start the loop again until we've reached the last iteration.
-
-## Setting up the pipeline
-
-```py
-nlp = spacy.blank("en")
-
-ner = nlp.create_pipe("ner")
-nlp.add_pipe(ner)
-
-ner.add_label("GADGET")
-```
-
-## Building a training loop
-
-- `nlp.begin_training`: Allocate models, pre-process training data and acquire an optimizer. [[Docs]](https://spacy.io/api/language#begin_training)
-
-```py
-# Data: 
-# [
-#   [
-#      'How to preorder the iPhone X', {'entities': [[20, 28, 'GADGET']]}
-#    ],
-#   ...
-# ]
-
-nlp = spacy.blank("en")
-ner = nlp.create_pipe("ner")
-nlp.add_pipe(ner)
-ner.add_label("GADGET")
-
-nlp.begin_training()
-
-losses = {}
-
-for itn in range(10):
-    random.shuffle(TRAINING_DATA)
-
-    for batch in spacy.util.minibatch(TRAINING_DATA, size=2):
-        
-        texts = [text for text, entities in batch]
-        annotations = [entities for text, entities in batch]
-
-        nlp.update(texts, annotations, losses=losses)
-    print(losses)
-```
-
-## Best practices
-
-### Problem 1: Models can "forget" things
-
-- Existing model can overfit on new data
-  - e.g.: if you only update it with `WEBSITE`, it can "unlearn" what a `PERSON` is
-  - Also known as **catastrophic forgetting**
-
-### Solution 1: Mix in previously correct predictions
-
-  - For example, if you're training `WEBSITE`, also include examples of `PERSON`
-  - Run existing spaCy model over data and extract all other relevant entities
-- **BAD**
-  - ```py 
-      TRAINING_DATA = [
-        ("Reddit is a website", {"entities": [(0, 6, "WEBSITE")]})
-      ]
-    ```
-
-- **GOOD**
-  -  ```python
-      TRAINING_DATA = [
-          ("Reddit is a website", {"entities": [(0, 6, "WEBSITE")]}),
-          ("Obama is a person", {"entities": [(0, 5, "PERSON")]})
-      ]
-      ```
-    
-### Problem 2: Models can't learn everything
-
-- spaCy's models make predictions based on local context
-  - Model can struggle to learn if decision is difficult to make based on context
-  - Label scheme needs to be consistent and not too specific
-  - For example: `CLOTHING` is better than `ADULT_CLOTHING` and `CHILDRENS_CLOTHING`
-
-### Solution 2: Plan your label scheme carefully
-
-- Pick categories that are reflected in local context
-- More generic is better than too specific
-- If the decision is difficult to make based on the context, the model can struggle to learn it.
-- Use rules to go from generic labels to specific categories
-
-- BAD:
-
-  ```python
-  LABELS = ["ADULT_SHOES", "CHILDRENS_SHOES", "BANDS_I_LIKE"]
-  ```
-
-- GOOD:
-  ```python
-  LABELS = ["CLOTHING", "BAND"]
-  ``` 
-
-
-  - BAD
-    - ```py
-      TRAINING_DATA = [
-        (
-            "i went to amsterdem last year and the canals were beautiful",
-            {"entities": [(10, 19, "TOURIST_DESTINATION")]},
-        ),
-        (
-            "You should visit Paris once in your life, but the Eiffel Tower is kinda boring",
-            {"entities": [(17, 22, "TOURIST_DESTINATION")]},
-        ),
-        ("There's also a Paris in Arkansas, lol", {"entities": []}),
-        (
-            "Berlin is perfect for summer holiday: lots of parks, great nightlife, cheap beer!",
-            {"entities": [(0, 6, "TOURIST_DESTINATION")]},
-        ),
-      ]
-      ```
-    - A much better approach would be to only label "GPE" (geopolitical entity) or "LOCATION" and then use a rule-based system to determine whether the entity is a tourist destination in this context. For example, **you could resolve the entities types back to a knowledge base or look them up in a travel wiki**.
+- Can be semi-automated – for example, using spaCy's Matcher
+- 
