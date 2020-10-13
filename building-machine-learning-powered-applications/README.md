@@ -339,3 +339,71 @@
 
 
 # Part II - Build a Working Pipeline
+# Chapter 3 - Build Your First End-to-End Pipeline
+## The Simplest Scaffolding
+- Start with the inference pipeline 
+  - Avoid training pipeline: we can instead write some simple rules for now
+  - allow us to quickly examine how users may interact with the output of a model
+  - helps gather useful information to make training a model easier
+  - critical to make us confront the problem and devise an initial set of hypotheses about how best to solve it
+- Start with simple heuristics
+  - devise it based on expert knowledge and data exploration 
+  - use it to confirm initial assumptions and speed up iteration
+- Create a CLI or API 
+  - simplify it as much as possible, and have a minimal functional version.
+```py
+input_text = parse_arguments() 
+processed = clean_input(input_text) 
+tokenized_sentences = preprocess_input(processed) suggestions = get_suggestions(tokenized_sentences)
+```
+### Parse and clean data
+- parse returns `args.text`
+  - @niazangels: Book uses argparse, I'm gonna use `typer`
+- clean could remove non-ASCII characters: 
+  - `return str(text.encode().decode('ascii', errors='ignore'))`
+### Tokenization
+- > Mr. O’Neill thinks that the boys’ stories about Chile’s capital aren’t amusing
+- @niazangels: Book uses `nltk`. I'm gonna use `spacy`
+
+### Generating Features
+- Some features we could use
+  - frequency of a few common verbs and connectors
+  - count adverb usage
+  - determine the Flesch readability score
+- Then return a report of these metrics to our users
+
+## Test Your Workflow
+### User Experience
+- how satisfying is the product to use?
+- is this the most useful way to present results to our users?
+
+### Modeling Results
+- If you set a ranking metric  to DCG@5, and notice that users only ever consider the first three results displayed, you should change our metric of success from DCG at 5 to 3.
+- The goal of considering both user experience and model performance is to **make sure we are working on the most impactful aspect**
+
+- **Finding the impact bottleneck**
+  - identify which challenge to tackle next.
+  - Most of the time, this will mean iterating on the way we present results to our users (**which could mean changing the way we train our models**) or improving model performance by identifying key failure points
+  - On the product side
+    - Document readability score vs. suggestions to improve
+  - On the model side
+    - Check for model biases
+    - Build a new cleaning and augmentation pipeline to attempt to address this
+    - dive deeper than an aggregate metric and look at the impact of your model on different slices of your data
+
+## ML Editor Prototype Evaluation
+- Test a simple question, a convoluted question, and a full paragraph.
+- Case study
+  - **Model**
+    - Model predicts paragraph as easier to read than the convoluted sentence.
+    - > attributes we are extracting from the text are not necessarily the most correlated with “good writing.” 
+
+  - **User experience**
+    - The information returned is both overwhelming and irrelevant
+    - The goal of our product is to provide actionable recommendations to our users.
+    - may want to boil down our recommendations to a single score, along with actionable recommendations to improve it.
+      - say "use fewer adverbs"
+      - provide sentence/word level correction
+      - could present results by highlighting or parts of the input that needs correction
+      - ![picture 2](images/62b68e6623f1e67e5d9d6ae91891845b2a951f724f3362f208dcb486bb1c0e7f.png)  
+    - 
