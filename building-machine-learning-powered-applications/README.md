@@ -22,7 +22,7 @@
 
    4. **Deployment and monitoring**: Once a model shows good performance, you should pick an adequate deployment option. **Once deployed, models often fail in unexpected ways.**
 
-# Part 1 - Find the Correct ML Approach
+# Part I - Find the Correct ML Approach
 
 # Chapter 1 - From Product Goal to ML Framing
 
@@ -188,4 +188,154 @@
 - The last line of defense is to have a **diverse workforce** that looks at the results. This will allow you to catch instances where a model is exhibiting discriminative behavior, 
   - tagging your friends as a gorilla
   - is insensitive by surfacing painful past experiences with its smart “this time last year” retrospective
-  - 
+
+
+# Chapter 2- Create a Plan
+- Covers the use of metrics to track ML and product progress and compare different ML implementations, identify methods to build a baseline and plan modeling iterations.
+
+- > Many ML projects be doomed from the start due to a misalignment between product metrics and model metrics. 
+- > More projects fail by producing good models that aren’t helpful for a product rather than due to modeling difficulties.
+
+## Measuring success
+- 3 Potential approaches
+  1. Baseline 
+       - designing heuristics based on domain knowledge
+       - No ML at this stage
+  2. Simple model 
+        - classifying text as good or bad, and using the classifier to generate recommendations
+  3. Complex model; 
+        - training an end-to-end model that goes from bad text to good text
+
+- **You Don’t Always Need ML**
+  - Can often simply use a heuristic for their first version. 
+  - After this, you may realize that you do not need ML at all.
+  - **Building a heuristic is also often the fastest way to build a feature** 
+  - Once its deployed, you’ll have a clearer view of your user’s needs
+
+- Categories of performance that have a large impact on the usefulness of any ML product: 
+  - Business metrics
+  - Model metrics
+  - Freshness
+  - Speed
+  ### Business metrics
+  - starting with a clear product or feature goal. 
+    - Then define a metricto judge its success
+    - **should be separate from any model metrics** and only be a reflection of the product’s success.
+    - Could be simple or complex Eg.
+      - number of users a feature attracts 
+      - click-through rate (CTR) of recommendations
+- **Product metrics are the only ones that matter**
+  - All other metrics should be used as tools to improve prod‐ uct metrics
+  - Do not need to be unique
+- Most projects tend to focus on improving one product metric, but their impact is often measured in terms of multiple metrics, including **guardrail metrics** 
+  - metrics that shouldn’t decline below a given point.
+  - increase CTR without decline in session length
+
+### Model performance
+- When a product is still being built and not deployed yet, it is not possible to measure usage metrics. 
+- To still measure progress, use an offline/model metric.
+- A good offline metric should be possible to evaluate without exposing a model to users, and be as correlated as possible with product metrics and goals
+- Eg. Autocomplete
+  - Business metric: CTR
+  - Model metric: 
+    - high accuracy in the next words prediction (hard)
+    - tag prediction for user input (easier)
+    - ![picture 1](images/918db1ee7a447cee86074bcd27cfcf5273cd3c6804c4d41d57b4bea457ab4450.png)  
+- Application can also be updated 
+  - Changing an interface so that a model’s results can be omitted if they are below a confidence threshold.
+  - Presenting a few other predictions or heuristics in addition to a model’s top pred
+    - Show 5 items instead of one
+  - Communicating to users that a model is still in an experimental phase and giving them opportunities to provide feedback
+    - Eg. Submit feedback on translations
+
+- Use a suitable metric
+  - Eg. Sketch to HTML
+    - Cross entropy does not account for alignment
+    - If one token is added in excess, all tokens appearing later will be shifted, leading to high loss
+    - Output does not really matter on token order
+    - BLEU scores are a better fit in this case
+- > **If a product relies on a model being perfect to be useful, it is very likely to produce inaccurate or even dangerous results**
+- >What is the worst accuracy a model can have and still be useful? If this accuracy requirement is hard to attain with current methods, could you redesign your product to make sure users are well served by it and not put at risk by prediction errors it could make?
+- Case study
+  - Should we use precision or recall?
+    - High precision means that when we do make a recommendation, it will tend to be correct
+
+### Freshness and distribution
+- How often will you need to retrain models, and how much will it cost you each time we do so? 
+- The right way to ask a question about mathematics will change much more slowly than the best phrasing of questions concerning music trends
+- You need new data to refresh the models
+- **You can collect data by letting users submit feedback with predictions**
+
+### Speed
+- Does user press a button or do we provide dynamic predictions as user updates inputs?
+- On an individual datapoint, this difference are small, but they can quickly add up when needing to run inference on tens of thousands of examples at a time.
+- If multiple network calls or database queries are involved, speed of inference becomes less of an issue
+
+## Estimate Scope and Challenges
+- In ML, success requires understanding the context of the task well, acquiring a good dataset, and building an appropriate model
+
+### Leverage Domain Expertise
+- The best way to devise heuristics is to see what experts are currently doing
+- The second best way to devise heuristics is to look at your data
+
+- **Learning from experts**
+  - understand which assumptions we can reasonably make.
+  - gather features to leverage, find pitfalls to avoid, and most importantly prevent us from reinventing the wheel
+
+- **Examining the data**
+  - In addition to EDA, it is crucial to individually label examples in the way you hope a model would.
+    - Eg. phrase labelling instead of entity labelling
+
+### Stand on the Shoulders of Giants
+- Look for public implementations either with similar models or similar datasets, or both
+- **Open data**
+  - a similar dataset simply means a dataset with similar input and output types (**but not necessarily domains**).
+  - ![picture 1](images/e74129dfb848bf1f50e276dc76f9e5b06d2f4fc0b40ead156c54fcf845da27af.png)  
+  - Dataset sources
+    - [Internet archive - The Dataset Collection](https://archive.org/details/datasets)
+    - [r/datasets](https://www.reddit.com/r/datasets/)
+    - [UCI Machine learning repository](https://archive.ics.uci.edu/ml/index.php)
+    - [Google dataset search](https://datasetsearch.research.google.com/)
+    - [Common crawl](https://commoncrawl.org/)
+    - [Wikipedia - List of datasets for machine-learning research](https://en.wikipedia.org/wiki/List_of_datasets_for_machine-learning_research)
+
+- **Open source code**
+  - Before building your own pipeline from scratch, it's worthwhile to observe what others have done.
+  - lets us see which challenges others have faced when doing similar modeling and surfaces potential issues with the given dataset
+  - **Look for repos tackling both your product goal and code working with the dataset you have chosen**
+  - First, try reproducing the results yourself
+  - If none of the existing models performs well on an open dataset, we'll know that this project will require significant work
+  - Steps
+    - Find a repo and train it on the dataset it was trained on. See if you can reproduce performance
+    - Train the above model on a dataset closer to your problem
+    - Judge how well its doing with metrics and iterate
+
+##  ML Editor Planning
+### Initial planning
+- > Build an initial model by using Stack Exchange questions and trying to predict a question’s upvotes score from its content. We will also use this opportunity to look through the dataset and label it, trying to find patterns
+- model will attempt to classify text quality accurately, to then provide writing recommendation
+- The engagement that a question receives depends on many more factors than just the quality of its formulation:
+  - Context
+  - Date
+  - Community to which it was posted
+  - Popularity of poster
+- Our first model will ignore all metadata related to a post
+
+## To Make Regular Progress: Start Simple
+- extremely hard to predict how far a given dataset or model will get us
+- Start simple and iterate
+
+### Start with a Simple Pipeline
+- helps understand what to tackle next
+- Ideally, the cleaning and preprocessing steps should be the same for both training and inference pipelines
+
+### Pipeline for the ML Editor
+- Will write both training and inference pipelines
+- Will write various analysis and exploration functions to help us diag‐ nose problems, such as:
+  - A function that visualizes examples the model performs the best and worst on 
+  - Functions to explore data 
+  - A function to explore model results
+- Acknowledge that models will not always work and to architect systems around this potential for mistakes.
+
+
+# Part II - Build a Working Pipeline
