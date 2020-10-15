@@ -220,4 +220,34 @@ bears = DataBlock(
 ### Unforeseen Consequences and Feedback Loops¶
 - A helpful exercise prior to rolling out a significant machine learning system is to consider this question: **"What would happen if it went really, really well?"** In other words, what if the predictive power was extremely high, and its ability to influence behavior was extremely significant? In that case, who would be most impacted? **What would the most extreme results potentially look like?** How would you know what was really going on?
 - **Of course, human oversight isn't useful if it isn't listened to, so make sure that there are reliable and resilient communication channels so that the right people will be aware of issues, and will have the power to fix them.**
+- You risk not having a feedback loop any time your model is potentially driving the next round of data
+- The people involved in the model oversight need to be involved in product and engineering, not siloed into a "Trust and Safety" team
 - > You are best positioned to **help people one step behind you**. The material is still fresh in your mind. Many experts have forgotten what it was like to be a beginner (or an intermediate) and have **forgotten why the topic is hard to understand when you first hear it**. The context of your particular background, your particular style, and your knowledge level will give a different twist to what you’re writing about.
+
+- You almost certainly do not need a GPU to serve your model in production. There are a few reasons for this:
+
+    - GPUs are only useful when they do lots of identical work in parallel.
+    - An alternative could be to wait for a few users to submit their images, and then batch them up and process them all at once on a GPU. Users then have to wait, rather than getting answers straight away! And you **need a high-volume site for this to be workable**. If you do need this functionality, you can use a tool such as **Microsoft's ONNX Runtime, or AWS Sagemaker**
+    - The complexities of dealing with GPU inference are significant. In particular, the GPU's memory will need careful manual management, and you'll need a careful queueing system to ensure you only process one batch at a time.
+    - There's a lot more market competition in CPU than GPU servers, as a result of which there are much cheaper options available for CPU servers.
+
+
+# Lesson 3
+- `RandomResizedCrop` 
+  - crops randomly on training set
+  - crops center on validation set
+- Other batch transforms only does augmentation on training set. Leaves val set untouched.
+- Why are images cropped to squares?
+  - Only because there are variations in image sizes in dataset
+  - If its one size, then its okay to not have squares
+  - Else you can choose images in each mini batches according to their sizes and decide what the best image size for each minibatch is
+- `learner_inf.predict` will give you confidences in the order of `learner.dls.vocab`. 
+  - `learner_inf = load_learner(...)`  will auto load the dls too within learner
+- Create a model that will work on a smaller subset of your data before working on the whole dataset
+  - This means fewer classes and fewer data points
+- Set 'Path.BASE_PATH` so that you don't have to see all the trailing slashes
+- Start with a stupid simple model
+  - Always predict the mean- see what accuracy you get
+
+- Pytorch
+  - `tns.type()` (tensor.LongTensor) is different from `type(tns)` (torch.Tensor)
