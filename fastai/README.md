@@ -251,3 +251,212 @@ bears = DataBlock(
 
 - Pytorch
   - `tns.type()` (tensor.LongTensor) is different from `type(tns)` (torch.Tensor)
+
+## Notes - Chapter 3
+
+- We will learn
+  - the roles of arrays and tensors and of broadcasting, 
+  - explain stochastic gradient descent (SGD),
+  - choice of a loss function for basic classification
+  - role of mini-batches
+  - math that a basic neural network is actually doing
+
+- >**We've seen that the only consistent trait amongst every fast.ai student that's gone on to be a world-class practitioner is that they are all very tenacious.**
+- Jupyter knows about PIL images, so it displays the image for us automatically.
+- Strategies for Baselines 
+  - think of a simple, easy-to-implement model
+  - search and find other people who have solved similar problems
+- **Rank**: 
+  - The length of a tensor's shape 
+  - number of axes or dimensions in a tensor
+- **Shape**
+  -  the size of each axis of a tensor
+
+```py
+
+>>> tensor([.1, .2, .3]).ndim
+1
+
+>>> tensor([[.1, .2, .3]]).ndim
+2
+
+>>> len(tensor([[.1, .2, .3]]).shape)
+2
+
+>>> tensor([[.1, .2, .3]]).shape
+torch.Size([1, 3])
+
+>>> tensor([[.1, .2, .3], [.1, .2, .3]]).shape
+torch.Size([2, 3])
+```
+
+- Intuitively, the difference between L1 norm and mean squared error (MSE) is that the latter will penalize bigger mistakes more heavily than the former (and be more lenient with small mistakes).
+
+-  **`fastai` adds some features to NumPy and PyTorch to make them a bit more similar to each other. **
+
+- **jagged array**: innermost arrays potentially being different sizes
+
+```py
+# Jagged array 
+>>> np.array([np.ones(2), np.ones(3)])
+array([array([1., 1.]), array([1., 1., 1.])], dtype=object)
+```
+- a PyTorch tensor cannot be jagged. It is always a regularly shaped multidimensional rectangular structure.
+
+- As a metric, we could use either mean squared error, or mean absolute error, and take the average of them over the whole dataset. However, neither of these are numbers that are very understandable to most people; in practice, we normally use accuracy as the metric for classification models.
+
+- > As we've discussed, we want to calculate our metric over a validation set. This is so that we don't inadvertently overfit—that is, train a model to work well only on our training data. This is not really a risk with the pixel similarity model we're using here as a first try, **since it has no trained components**
+- It's good to get in the habit of checking shapes as you go.
+- `batch_tfms` needs all images to be of the same size. It runs on a whole batch, in the GPU. `item_tfms` is a previous step that ensures that size consistency, and it runs on the CPU.
+- >It’s best to retrain your model regularly, on a mix of new and old data. What percentage of which depends on your problems: bears don’t change so you probably want everything, but if your data could shift, you probably want some mix like 80-90% new and 20-10% old. (sgugger)[https://forums.fast.ai/t/lesson-3-official-topic/67244/99?u=niazangels]
+- **Broadcasting**:  automatically expand the tensor with the smaller rank to have the same size as the one with the larger rank.
+- `mean((-1,-2))`: Take mean over the last two axes. We are left with just the first tensor axis, which indexes over our images, which is why our final size was `(1010)`
+- `tensor.requires_grad_` : tells PyTorch that we want to calculate gradients with respect to that variable at that value
+- The PyTorch API also puts the focus on the **argument**, not the function you're actually computing the gradients of. It may feel backwards at first, but it's just a different perspective.
+- >  Life would probably be easier if `backward` was just called `calculate_grad`
+
+```py
+>>> xt = tensor([1., 2., 3.]).requires_grad_()
+>>> def f(x):
+    ... return (x**2)
+>>> yt = f(xt)
+>>> yt.backward()
+
+RuntimeError: grad can be implicitly created only for scalar outputs
+```
+
+- "stepping your parameters": using an optimizer step. (`w -= gradient(w) * lr`)
+
+# Lesson 4
+
+- **Parameters**: Weights + biases
+- Some metrics have a nicely defined gradient and can be directly used as a loss - eg. MSE, but not for classification
+- Why not use median instead of mean for loss, since its less prone to influence by outlier? 
+  - Median pretty much focuses on one number, and ignores the rest
+  - In fact all that it cares abt is the order of things
+  - So J's guess is it'll only be good at predicting one thing in the middle
+  - Middle would also give you zero gradient at some point- just J's guess
+
+- fastai `DataLoader` holds batched data from dataset
+- `nn.ReLU` is a class. `F.relu` is a fn.
+- Won't a RelU create all zeros in case of a negative matrix? Won't this cause zero grads and stop training?
+  - Yes, but there wont be zeros for every image
+  - And in a mini batch, we shuffle every time we create a new epoch
+  - And so even if its zero for one minibatch, it wont be for the next mini batch
+  - Also this is where leaky RelUs help
+  - Even better is to init the weights to sensible values and step by sensible amounts (so it stays positive)
+  - We will also see how to analyze inside these networks to see how many dead neurons we have: they are bad and do not do any work
+  - `learn.model` contains the actual model obj
+```py
+m = learn.model
+w, b = m[0].parameters()
+show_image(w[0].view(28, 28))
+# J: We might have far more filters than we need - which is why some of the visualizations are not that obvious
+```
+> J: "There are many non linearities to choose from and it generally doesnt matter which one, so just choose relu / any one.
+
+## Notes - Chapter 5
+
+- Each zoom/warp/resize will need an interpolation step which is not just slow by also lower the quality of the image
+- fastai does all the co-ord transformation and apply it only once to do the interpolation
+- `datablock.summary(path/'images')`, tells you everything that was happening
+- J: We recommend creaing a model as soon as you can- even before cleaning the data. Your model can teach you about the problems in your data.
+- fastai will automatically pick a reasonable loss fn for you. See `learn.loss_func`
+- `dls.one_batch()` is equivalent to `first(dls.train)`
+- `F.nll_loss` confusingly does not do a log.
+  - its more convenient to take the log at the softmax step
+
+
+## Notes - Lesson 5 - Data Ethics
+
+- **Feedback loop**: Occurs whenever the model controls the next round of data you get. The data that is returned quickly becomes flawed by the model itself.
+- Common issue: Systems implemented with no way to identify and address mistakes
+- Facebook - if you change the picture in the ad from a white family to a black family, it gets served to very different audiences
+- Deepglint
+  - https://www.youtube.com/watch?v=xhp47v5OBXQ
+  - https://www.youtube.com/watch?v=C7AkwHvldBY
+- Much of AI/ML centers on optimizing a metric.   Overempahsizing metrics leads to 
+  - Manipulation
+  - Gaming
+  - Mypoic focus on short term goals
+  - Unexpected negative consequences
+
+- > "Platforms are structurally at war with themselves- Outrageous, offensive content is exactly what goes viral."
+- Major tech platforms unintentionally incentivize and promote disinformation by
+  - Their design and architecture
+  - Their recommendation system
+  - Their business models
+- Hockeystick growth relies on automation and a reliance on metrics
+  - Priotitizing speed above all else does not leave 
+- The problem with biased data - Harini Suresh: https://medium.com/@harinisuresh/the-problem-with-biased-data-5700005e514c
+- Questions to ask about AI
+  - Should we even be doing this?
+  - What is the bias in the data?
+    - All data is biased
+    - Datasheet for datasets
+  - Can the code and data be audited?
+  - What are the error rates for different sub groups?
+    - light vs dark , men vs women, dark-women vs light-men
+  - What is the accuracy of a simple rule based alternative?
+  - What process are in place to handle appeals or mistakes?
+  - How diverse is the team that built it?
+  - Consequentialist Questions
+    - Who will be directly affected by this project? Who will be indirectly affected?
+    - Will the effects in aggregate likely create more good than harm, and what types of good and harm?
+    - Are we thinking about all relevant types of harm/benefit (psychological, political, environmental, moral, cognitive, emotional, institutional, cultural)?
+    - How might future generations be affected by this project?
+    - Do the risks of harm from this project fall disproportionately on the least powerful in society? Will the benefits go disproportionately to the well-off?
+    - Have we adequately considered "dual-use"?
+
+- ### Tool 1: Ethical Risk Sweeping
+- Institute regularly scheduled ethical risk sweeping practices
+- Treat it like cybersec - "No vuln found" is a good outcome, but its not wasted effort- you **keep doing it**
+- **Assume you missed some risks** in the initial project development phase- and **reward team members** for spotting new ethical risks
+### @niazangels: Where's Tool 2?
+### Tool 3: Expanding the Ethical Circle
+- Whose interests, desires, skills, experiences and values have we simply assumed, rather than actually consulted?
+- Who are all the stakeholders who will be directly affected by our product? How have their interests been protected? How do we know what their interests really are? Have we asked?
+
+### Tool 6: Think about terrible people
+  - Who will want to abuse, steal, misinterpret, hack, destroy, or weaponize what we built?
+  - Who will use it with alarming stupidity/irrationality?
+  - What rewards/incentives/openings has our design inadvertantly created for those people?
+  - How can we remove those rewards or incentives?
+### Tool 7: Closing the loop: Ethical Feedback and iteration
+  - Remember that the ethical design/engineering is never a finished task
+  - Identify feedback channels that will deliver reliable data on ethical impact
+  - Integrate the process w/ quality manangement and user input
+  - Develop formal procedures and chains of responsibility for ethical iteration
+
+---
+
+- If product managers, engineers and visionaries cared about this stuff, you wouldn't need a trust and safety team. It would be built into the product.
+- **If you're looking for a job, look for companies where founders have a background similar to you** 
+
+- 
+  - Blog: https://medium.com/@harinisuresh/the-problem-with-biased-data-5700005e514c
+  - Paper: https://arxiv.org/pdf/1901.10002.pdf
+  > An engineer building a smiling-detection system observes that the system has a higher false negative rate for women. Over the next week, she collects many more images of women, so that the proportions of men and women are now equal, and is happy to see the performance on the female subset improve.
+
+  > Meanwhile, her co-worker has a dataset of job candidates and human-assigned ratings, and wants to build an algorithm for predicting the suitability of a candidate. He notices that women are much less likely to be predicted as suitable candidates than men. Inspired by his colleague’s success, he collects many more samples of women, but is dismayed to see that his model’s behavior does not change.
+
+  > Why did this happen? The sources of the disparate performance in either case were different: **In the first case, it arose because of a lack of data on women**, and introducing more data solved the issue. 
+  
+  >**In the second case, the use of a proxy label (human assessment of quality) versus the true label (actual qualification) allowed the model to discriminate** by gender, and collecting more labelled data from the same distribution did not help.
+  > ![picture 1](images/3570535328a9ea4bc74e12d7cf4dadc65aa4c4aa36157184b73a3feab7504f29.png)  
+
+  > **Historical bias** arises when there is a misalignment between world as it is and the values or objectives to be encoded and propagated in a model. It is a normative concern with the state of the world, and exists even given perfect sampling and feature selection.
+  
+  > **Representation bias** arises while defining and sampling a development population. It occurs when the development population under-represents, and subsequently causes worse performance, for some part of the final population.
+  
+  > **Measurement bias** arises when choosing and measuring the particular features and labels of interest. Features considered to be relevant to the outcome are chosen, but these can be incomplete or contain group- or input-dependent noise. In many cases, the choice of a single label to create a classification task may be an oversimplification that more accurately measures the true outcome of interest for certain groups.
+  
+  > **Evaluation bias** occurs during model iteration and evaluation, when the testing or external benchmark populations do not equally represent the various parts of the final population. Evaluation bias can also arise from the use of performance metrics that are not granular or comprehensive enough.
+  
+  > **Aggregation bias** arises when flawed assumptions about the population affect model definition. In many applications, the population of interest is heterogeneous and a single model is unlikely to suit all subgroups.
+
+  > As an ML practitioner, knowledge of an application can and should inform the identification of bias sources. Issues that arise in image recognition, for example, are often related to selection or evaluation bias since large publicly-available image datasets frequently do not equally represent the entire space of images that we care about. In data that is affected by human decision-makers, we often see human decisions used as proxies, introducing measurement bias. **For example, “arrested” is used as a proxy for “crime,” or “pain medication prescribed by doctor” is used as a proxy for “patient’s pain.”** Identifying aggregation bias usually requires an understanding of meaningful groups and reason to think they are distributed differently. Medical applications, for example, often risk aggregation bias because patients with similar underlying conditions present and progress in different ways. Recognizing historical bias requires a retrospective understanding of the application and data generation process over time.
+  
+  > - Understand “bias” in ML at the right level of abstraction to facilitate more productive communication and development of solutions. 
+  > - Terms such as “training data bias” are too broad to be useful
+  > - Encourage application-appropriate solutions rather than relying on broad notions of what is fair
