@@ -446,7 +446,12 @@ show_image(w[0].view(28, 28))
   > ![picture 1](images/3570535328a9ea4bc74e12d7cf4dadc65aa4c4aa36157184b73a3feab7504f29.png)  
 
   > **Historical bias** arises when there is a misalignment between world as it is and the values or objectives to be encoded and propagated in a model. It is a normative concern with the state of the world, and exists even given perfect sampling and feature selection.
-  
+  >  - When doctors were shown identical files, they were much less likely to recommend cardiac catheterization (a helpful procedure) to Black patients.
+ >  - When bargaining for a used car, Black people were offered initial prices $700 higher and received far smaller concessions.
+ >  - Responding to apartment rental ads on Craigslist with a Black name elicited fewer responses than with a white name.
+ >  - An all-white jury was 16 percentage points more likely to convict a Black defendant than a white one, but when a jury had one Black member it convicted both at the same rate.
+
+
   > **Representation bias** arises while defining and sampling a development population. It occurs when the development population under-represents, and subsequently causes worse performance, for some part of the final population.
   
   > **Measurement bias** arises when choosing and measuring the particular features and labels of interest. Features considered to be relevant to the outcome are chosen, but these can be incomplete or contain group- or input-dependent noise. In many cases, the choice of a single label to create a classification task may be an oversimplification that more accurately measures the true outcome of interest for certain groups.
@@ -460,3 +465,35 @@ show_image(w[0].view(28, 28))
   > - Understand “bias” in ML at the right level of abstraction to facilitate more productive communication and development of solutions. 
   > - Terms such as “training data bias” are too broad to be useful
   > - Encourage application-appropriate solutions rather than relying on broad notions of what is fair
+
+  ## Notes - Chapter 3
+
+  - > Sometimes, the right response to being asked to do a piece of work is to just say "no." Often, however, the response we hear is, "**If I don’t do it, someone else will.**" But consider this: if you’ve been picked for the job, you’re the best person they’ve found to do it—so **if you don’t do it, the best person isn’t working on that project.** If the first five people they ask all say no too, even better!
+
+- Four points
+  - Recourse and Accountability
+  - Feedback loops
+  - Bias
+  - Disinformation
+
+### Recourse and Accountability
+- Bureaucracy has often been used to shift or evade responsibility
+- Mechanisms for audits and error correction are crucial. In some existing systems, there are no process in place for correcting mistakes or removing people once they’d been added
+
+### Feedback Loops
+- YouTube's recommendation algorithm had begun curating playlists for pedophiles, picking out innocent home videos that happened to contain prepubescent, partially clothed children. Same for conspiracy theories.
+
+- Part of the problem here is the centrality of metrics in driving a financially important system. **When an algorithm has a metric to optimize, as you have seen, it will do everything it can to optimize that number.** This tends to lead to all kinds of edge cases, and humans interacting with a system will search for, find, and exploit these edge cases and feedback loops for their advantage.
+
+### Disinformation
+
+- It is not necessarily about getting someone to believe something false, but rather often used to **sow disharmony and uncertainty**, and to get people to give up on seeking the truth. Receiving conflicting accounts **can lead people to assume that they can never know** whom or what to trust.
+
+- disinformation can often contain seeds of truth, or half-truths taken out of context. 
+
+  ## Notes - Lesson 6
+  - Q: What is Cross entropy loss?
+  - How does LRfinder work? 
+    - How does it use cbs?
+    - `defaults` in `Learner`
+  
