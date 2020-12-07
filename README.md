@@ -4,6 +4,9 @@
 ## Product management
 - 📙 [Shape Up](shape-up/README.md) / [Full book](https://basecamp.com/shapeup)
 
+## Product design
+-  🖥️ [Product Design: The Delft Design Approach](product-design-delft-design-approach/) / ([edX](https://www.edx.org/course/product-design-the-delft-design-approach))
+
 ## Machine Learning
 - 🖥️ [Fastai - 2020](fastai/) / ([course.fast.ai](https://course.fast.ai))
 - 📙 [Building Machine Learning Powered Applications](building-machine-learning-powered-applications/)
