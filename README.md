@@ -10,6 +10,7 @@
 ## Machine Learning
 - 🖥️ [Fastai - 2020](fastai/) / ([course.fast.ai](https://course.fast.ai))
 - 📙 [Building Machine Learning Powered Applications](building-machine-learning-powered-applications/)
+- 📙 [Bandit Algorithms for Website Optimization](bandit-algorithms-for-website-optimization/)
 - 🖥️ [Deployment of machine learning models](deployment-of-machine-learning-models/) / ([Udemy](https://www.udemy.com/course/deployment-of-machine-learning-models/README.md))
 - 🖥️ [End to End Machine Learning with TensorFlow](end-to-end-machine-learning-with-tensorflow/README.md)
 - 🖥️ [Production Machine Learning Systems](production-machine-learning-systems/README.md)
