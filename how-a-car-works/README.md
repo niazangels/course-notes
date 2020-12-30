@@ -129,3 +129,23 @@
 - A well designed cooling system will have no air gaps, no voids where coolant can get trapped
   - you want to be able to drain all of the coolant and not have any reservoirs of coolant
   - its the same with the oil passage.
+
+## Crankshaft
+- Converts up and down motion into rotation motion
+- Rotation motion from one end connects to the flywheel, and is carried to the wheels
+- Usually made of cast iron or forged steel
+- To identify the material, see the parting line
+  - If its thin, its probably cast iron
+- ![picture 1](images/45293567ef8f98cdac60e0674c1b90717a9a8e7e9aebf7225865d79bff909f27.png)
+
+### Parts of the crankshaft
+- Crankshaft rotates around the main journals
+- A #journal is an inner part of a bearing - its the shaft that rotates inside the bearing
+- ![picture 2](images/4746752072f6964226d6ca518e9da4c159780fbc4f0892dbb5aa6d5fbb5b47e5.png)  
+- Main journals are along the axis of the crankshaft 
+- In between the mains, we have the #rod journals
+  - Offset from the mains
+  - Fit through the big end of the connecting rod (other end connects to the piston)
+  - AKA crank pins, big end journals, "pins"
+- Parts that join rod journals and the mains are called #webs
+- At the end of the webs, there's a counterweight
