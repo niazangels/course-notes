@@ -17,12 +17,16 @@
 - 📙 [Human in the Loop Machine Learning](human-in-the-loop-machine-learning/README.md)
 - 🖥️ [Testing and monitoring of Machine Learning Models](testing-and-monitoring-of-machine-learning-model-deployments/README.md)
 
+## Languages
+- 🖥️ [Complete Javascript Course](./complete-javascript-course/README.md)
+- 🖥️ [The Complete Elixir and Phoenix Bootcamp](./elixir-phoenix-complete-course/README.md)
+
+
 ## Testing
 - 🖥️ [Automated software testing with Python](automated-software-testing-with-python/README.md)
 
 ## Frontend
 - 🖥️ [Advanced CSS and SCSS](./advanced-css-and-sass/README.md)
-- 🖥️ [Complete Javascript Course](./complete-javascript-course/README.md)
 - 🖥️ [Modern React with Redux](./modern-react/README.md)
 
 ## Writing
@@ -32,3 +36,6 @@
 
 ## Automotive
 -  🖥️ [How a car works](how-a-car-works/) / [Website](https://howacarworks.com)
+
+## Finance
+-  🖥️ [Complete Investing Course](complete-investing-course/) / [Udemy](https://www.udemy.com/course/complete-investing-course-stocks-etfs-index-mutual-funds)
