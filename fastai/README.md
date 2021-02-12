@@ -151,8 +151,9 @@
      - implicit information regarding which pages linked to which other pages could be used for this purpose.
 4. **Only after these first three steps do we begin thinking about building the predictive models**. 
 - Our objective and available levers, what data we already have and what additional data we will need to collect, determine the models we can build.
+- > Let's consider another example: recommendation systems. The objective of a recommendation engine is to drive additional sales by surprising and delighting the customer with recommendations of items they would not have purchased without the recommendation. The lever is the ranking of the recommendations. New data must be collected to generate recommendations that will cause new sales. This will require conducting many randomized experiments in order to collect data about a wide range of recommendations for a wide range of customers. This is a step that few organizations take; but without it, you don't have the information you need to actually optimize recommendations based on your true objective (more sales!).
 - Another example: You could build two models for purchase probabilities, conditional on seeing or not seeing a recommendation.
-  -  The difference between these two probabilities is a utility function for a given recommendation to a customer.
+  -  **The difference between these two probabilities is a utility function for a given recommendation to a customer.**
   -  It will be low in cases where the algorithm recommends a familiar book that the customer has already rejected (both components are small) or a book that they would have bought even without the recommendation (both components are large and cancel each other out).
 
 ### Gathering data
@@ -200,6 +201,7 @@ bears = DataBlock(
   - If we crop the images, we remove some of the features that allow us to perform recognition. eg. a key part of the body or the face necessary to distinguish between similar breeds. 
   - If we pad the images then we empty space, which is just wasted computation for our model, results in a lower effective resolution for the part of the image we actually use.
   - Instead, on each epoch randomly crop a different part of each image. Now  our **model can learn to focus** on, and recognize, different features in our images. 
+  - If all the images are of the same size, we can apply these augmentations to an entire batch of them using the GPU, which will save a lot of time.
   - The intuitive approach to doing data cleaning is to do it before you train a model. But **a model can actually help you find data issues more quickly and easily**. So, we normally prefer to train a quick and simple model first, and then use it to help us with data cleaning.
   - Photos that people are most likely to upload to the internet are the kinds of photos that do a good job of clearly and artistically displaying their subject matter—which isn't the kind of input this system is going to be getting.
 - **Domain shift**: the type of data that our model sees changes over time. For instance, an insurance company's pricing and risk algorithm- over time the types of customers that the company attracts, and the types of risks they represent, may change so much that the original training data is no longer relevant.
@@ -304,6 +306,9 @@ array([array([1., 1.]), array([1., 1., 1.])], dtype=object)
 - a PyTorch tensor cannot be jagged. It is always a regularly shaped multidimensional rectangular structure.
 
 - As a metric, we could use either mean squared error, or mean absolute error, and take the average of them over the whole dataset. However, neither of these are numbers that are very understandable to most people; in practice, we normally use accuracy as the metric for classification models.
+
+- > We already had a metric, which was overall accuracy. So why did we define a loss? The key difference is that **the metric is to drive human understanding and the loss is to drive automated learning**. 
+- > To drive automated learning, **the loss must be a function that has a meaningful derivative**. It **can't have big flat sections and large jumps**, but instead must be reasonably smooth. This is why we designed a loss function that would respond to small changes in confidence level. This requirement means that sometimes it does not really reflect exactly what we are trying to achieve, but is rather a compromise between our real goal, and a function that can be optimized using its gradient. The loss function is calculated for each item in our dataset, and then at the end of an epoch the loss values are all averaged and the overall mean is reported for the epoch.
 
 - > As we've discussed, we want to calculate our metric over a validation set. This is so that we don't inadvertently overfit—that is, train a model to work well only on our training data. This is not really a risk with the pixel similarity model we're using here as a first try, **since it has no trained components**
 - It's good to get in the habit of checking shapes as you go.
