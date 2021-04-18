@@ -496,9 +496,51 @@ show_image(w[0].view(28, 28))
 
 - disinformation can often contain seeds of truth, or half-truths taken out of context. 
 
-  ## Notes - Lesson 6
-  - Q: What is Cross entropy loss?
-  - How does LRfinder work? 
-    - How does it use cbs?
-    - `defaults` in `Learner`
-  
+# Lesson 6
+- Q: What is Cross entropy loss?
+- How does LRfinder work? 
+  - Runs through the DataLoader, picks a mini batch each time
+  - Each mini batch is trained with a little bigger LR
+  - Plot all LRs
+  - lr_min = lr_at_min_loss / 10, lr_steep = lr_at_most_change
+- `cnn_learner` freezes the model for us, so we dont have to do it ourselves
+- `fit_one_cycle` increases lr to lr_max for the first 1/3 of the batches and then reduces for the next 2/3rds
+- If your model performance overshoots with `fit_one_cycle`, say 8th epoch had better performance than 12th epoch, then
+  - Change the epochs in `fit_one_cycle` to 8
+  - Now you'll have a low lr at epoch 8 and have generally better performance than before
+- The `metric` and `val_loss` may not always be in lockstep (moving together)
+- `Learner.to_fp16` can switch models to half precision and make training 2x-3x faster
+  - You can also switch to a bigger model and have it train in the same time as a smaller model with full precision
+- A `DataLoader` takes in a dataset. 
+- A dataset is anything that can be indexed into and has a len
+  - Often each item in a dataset is an (input, output) pair
+- **Tip: **`zip(*b)` is used often to transpose `b`
+- `Datasets` contain a training `Dataset` and a validation `Dataset`
+
+```py 
+dss = Dataset(filenames, [[ops_for_getting_x], [ops_for_getting_y]])
+dls = DataLoaders.from_dsets(dss, batch_size=64)
+```
+- You don't normally have to do this yourself. The `DataBlock` does this for you.
+
+```py
+>>> dblock = DataBlock()
+>>> dsets = dblock.datasets(df)
+>>> len(dsets.train), len(dsets.valid)
+80, 20
+>>> x, y = dsets[0]
+```
+In the absence of transforms, the dataset returns the same row twice as x and y
+
+```py
+dblock = DataBlock(get_x=lambda x: Image.open(x['fname']), 
+                  get_y=lambda y: y['fname'].split[0])
+```
+- Note that **if you use lambdas, you can't export the `DataBlock` / `Learner`**- you have to separate these out as fns.
+- Q: For `MultiCategoryBlock` why is the tensor `float`s and not `int`s since it can only be 0 or 1?
+  - A: Because we're going to use a cross entropy style loss and things will be faster in the gpu if we start using floats now.
+
+- Usually people train with higher precision and round off models to fp8 or even bool for faster inference. But training with those low precisions are a pain because of how bumpy the grads can be.
+
+- Its okay to use the val set to pick a hyperparameter (threshold for acc) if its a smooth curve. Avoid picking a random value from a bumpy curve because you might be just lucky. 
+
