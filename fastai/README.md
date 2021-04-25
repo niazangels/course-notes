@@ -544,3 +544,33 @@ dblock = DataBlock(get_x=lambda x: Image.open(x['fname']),
 
 - Its okay to use the val set to pick a hyperparameter (threshold for acc) if its a smooth curve. Avoid picking a random value from a bumpy curve because you might be just lucky. 
 
+# Notes - Chapter 5
+- `RandomResizedCrop` will be added for you if you include the `min_scale` parameter in your aug_transforms 
+- `dls.show_batch(*max_n=16)`
+- Once you think your data looks right, we generally recommend the next step should be using it to train a simple model. 
+- **We often see people put off the training of an actual model for far too long. **
+- The exponential also has a nice property: if one of the numbers in our activations x is slightly bigger than the others, the exponential will amplify this (since it grows, well... exponentially), which means that in the softmax, that number will be closer to 1.
+- Softmax fn really wants to pick one class among the others, so it's ideal for training a classifier when we know each picture has a definite label 
+**- During inference you might want your model to sometimes tell you it doesn't recognize any of the classes** that it has seen during training, and not pick a class because it has a slightly bigger activation score. In this case, it might be better to **train a model using multiple binary output columns**, each using a sigmoid activation.
+
+- With log, multiplication, which can create huge and tiny numbers, can be replaced by addition, which is much less likely to result in overflow/underflow.
+- Despite its name, `F.nll_loss` does not take the log. **It assumes that you already took the log of the softmax.**
+- PyTorch has a function called `log_softmax` that combines `log` and `softmax` in a fast and accurate way. `nll_loss` is designed to be used after `log_softmax`
+- `nn.CrossEntropyLoss` actually does `log_softmax` and then `nll_loss`
+- By default PyTorch loss functions take the mean of the loss of all items. You can use `reduction='none'` to disable that: `nn.CrossEntropyLoss(reduction='none')(acts, targs)`
+- The gradient of `cross_entropy(a,b)` is just `softmax(a)-b`. Since `softmax(a)` is just the final activation of the model, that means that the gradient is proportional to the difference between the prediction and the target.
+  - This is the same as mean squared error in regression (assuming there's no final activation function such as a limiter), since the gradient of `(a-b)**2` is `2*(a-b)`. 
+  - Because the gradient is linear, we won't see sudden jumps in gradients, which should lead to smoother training of models.
+- When we call the `fine_tune` method fastai does two things:
+    - Trains the randomly added layers for one epoch, with all other layers frozen
+    - Unfreezes all of the layers, and trains them all for the number of epochs requested
+- ![picture 1](images/72b267e91cea0d14f4e54a8b012eb53d20c34190aa1b3b83b41aaddad9e44af2.png)  
+- `fastai` lets you pass a Python `slice` object anywhere that a learning rate is expected. 
+  - `(earliest_layer_lr, final_layer_lr)` 
+  - The layers in between will have learning rates that are multiplicatively equidistant throughout that range.
+- Overfitting: val loss starts increasing
+  - But this **does not mean that it is getting less accurate**, necessarily.
+  - You will often see that the training accuracy continues improving
+- > On the other hand, you may well see that the metrics you have chosen are really getting worse at the end of training. Remember, it's **not just that we're looking for the validation loss to get worse, but the actual metrics**. Your validation loss will first get worse during training because the model gets overconfident, and only later will get worse because it is incorrectly memorizing the data. We only care in practice about the latter issue. **Remember, our loss function is just something that we use to allow our optimizer to have something it can differentiate and optimize; it's not actually the thing we care about in practice.**
+- > Before the days of 1cycle training it was very common to save the model at the end of each epoch, and then select whichever model had the best accuracy out of all of the models saved in each epoch. This is known as early stopping. However, this is very unlikely to give you the best answer, because those epochs in the middle occur before the learning rate has had a chance to reach the small values, where it can really find the best result. **Therefore, if you find that you have overfit, what you should actually do is retrain your model from scratch, and this time select a total number of epochs based on where your previous best results were found.**
+- A bigger model has the ability to better capture the real underlying relationships in your data, and also to capture and memorize the specific details of your individual images.
