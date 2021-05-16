@@ -608,4 +608,14 @@ class DotProduct(Module):
 - `F.binary_cross_entropy` and its module equivalent `nn.BCELoss` calculate cross-entropy on a one-hot-encoded target, **but do not include the initial `sigmoid`**. 
   - Normally for one-hot-encoded targets you'll want `F.binary_cross_entropy_with_logits` (or `nn.BCEWithLogitsLoss`), which do both sigmoid and binary cross-entropy in a single function
 - For multicat, we can't use `accuracy` - we need to use `accuracy_multi`
+
+
+# Notes - Chapter 7 - Tranining a state of the art model
+- > It's particularly unlikely to be the dataset that you want to do your development and prototyping in. You should aim to have an iteration speed of no more than **a couple of minutes**.
+- There is an additional benefit to progressive resizing: it is another form of data augmentation. 
+- Mixup requires far more epochs to train to get better accuracy, compared to other augmentation approaches we've seen
+- >There's another subtle issue that Mixup deals with for us, which is that it's not actually possible with the models we've seen before for our loss to ever be perfect. The problem is that our labels are 1s and 0s, but the outputs of softmax and sigmoid can never equal 1 or 0. This means training our model pushes our activations ever closer to those values, such that the more epochs we do, the more extreme our activations become.
+
+- > With Mixup we no longer have that problem, because our labels will only be exactly 1 or 0 if we happen to "mix" with another image of the same class. The rest of the time our labels will be a linear combination, such as the 0.7 and 0.3 we got in the church and gas station example earlier.
+- Like with Mixup, you won't generally see significant improvements from label smoothing until you train more epochs. 
 - 
