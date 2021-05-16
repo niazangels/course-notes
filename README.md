@@ -20,6 +20,7 @@
 ## Languages
 - 🖥️ [Complete Javascript Course](./complete-javascript-course/README.md)
 - 🖥️ [The Complete Elixir and Phoenix Bootcamp](./elixir-phoenix-complete-course/README.md)
+- 📙 [The Joy of Elixir](./joy-of-elixir/README.md) / [Full Book](https://joyofelixir.com)
 
 
 ## Testing
