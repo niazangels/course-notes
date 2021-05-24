@@ -619,3 +619,25 @@ class DotProduct(Module):
 - > With Mixup we no longer have that problem, because our labels will only be exactly 1 or 0 if we happen to "mix" with another image of the same class. The rest of the time our labels will be a linear combination, such as the 0.7 and 0.3 we got in the church and gas station example earlier.
 - Like with Mixup, you won't generally see significant improvements from label smoothing until you train more epochs. 
 - 
+
+# Notes - Chapter 8 - Collaborative filtering
+- What is an embedding?
+  - indexing can be represented as matrix multiplication
+  - for this we need an OHE representation of the index 
+  - no real underlying reason to store the one-hot-encoded vector,
+  - we should just be able to index into an array directly with an integer.
+  - PyTorch includes a special layer that does just this
+  - derivative is identical to OHE matmul
+  - this is called an embedding
+  - the thing that you multiply the one-hot-encoded matrix is called the embedding matrix.
+- Forcing predictions to be between 0 and 5 can improve performance. Just add sigmoid. 
+  - It's actually better to have the range go a little bit over 5, so we use (0, 5.5):
+  - This is because the tail ends of the input need to be infinity to predict extremes in sigmoid.
+  - @niazangels: Jeremy used (0,5,5), but I used (-0.5, 5.5) and got even better results
+
+- Weight decay
+  - `loss_with_wd = loss + wd * (parameters**2).sum()`
+  - But this computation is numerically unstable if you have large weights
+  - However, the derivative is `parameters.grad += wd * 2 * parameters`
+  - We can make `wd` twice as large, and have `parameters.grad += wd * parameters`
+- 
