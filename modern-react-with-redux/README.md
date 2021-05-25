@@ -402,3 +402,10 @@ class ImageCard extends React.Component {
 }
 
 ```
+# Section 12 - Hook System
+
+- useState: Fn that lets you use the state in a functional component
+- useEffect: Fn that lets you use something like a lifecycle method in a functional component
+- useRef: Fn that lets you create a ref in a functional component
+
+- Hooks are a way to write reusable code instead of more classic techniques like inheritance
