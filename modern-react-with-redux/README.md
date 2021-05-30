@@ -409,3 +409,13 @@ class ImageCard extends React.Component {
 - useRef: Fn that lets you create a ref in a functional component
 
 - Hooks are a way to write reusable code instead of more classic techniques like inheritance
+
+```js
+// Array destructuring
+const [name, setName] = useState("Niyas")
+```
+
+- reason we dont do `<a onClick={f(index)}>` is because it is triggers when the item is first rendered even without clicking. So we use `<a onClick={() => f(index)}>`
+
+- initial state is only set when rendering the component for the first time.
+- 
