@@ -640,4 +640,215 @@ class DotProduct(Module):
   - But this computation is numerically unstable if you have large weights
   - However, the derivative is `parameters.grad += wd * 2 * parameters`
   - We can make `wd` twice as large, and have `parameters.grad += wd * parameters`
+
+- What do you recommend when a new user / new product enters the system?
+  - Use your common sense
+  - Pick some particular user to represent average taste
+- > Think about what questions you could ask them that could help you to understand their tastes. Then you can create a model where the **dependent variable is a user's embedding vector**, and the independent variables are the results of the questions that you ask them, along with their signup metadata.
+- A small number of extremely enthusiastic users may end up effectively setting the recommendations for your whole user base.\
+  - end up attracting more people like them to your system
+- Expect positive feedback loops to be the norm, not the exception. 
+  - Plan for that, and identify up front how you will deal with these issues
+- To reduce the capacity of `DotProductWithBias`so it doesn't overfit:
+  - reduce latent factors
+    - this reduces the model to become simpler
+  - weight decay
+
+- Q: How does fastai suggest embedding dims for collab?
+
+- With `EmbeddingNN` we can directly incorporate other user and movie information, date and time information, or any other information that may be relevant to the recommendation.
+
+## Notes - Chapter 9 - Tabular Data
+- Embedding transforms the categorical variables into inputs that are both continuous and meaningful.
+- > Generally it's a good idea to specify `low_memory=False` unless Pandas actually runs out of memory and returns an error. The `low_memory` parameter, which is True by default, tells Pandas to only look at a few rows of data at a time to figure out what type of data is in each column. This means that Pandas can actually end up using different data type for different rows, which generally leads to data processing errors or model training problems later.
+- Handle ordinals (classes with natural order)
+- **RMSLE**
+  - From: https://medium.com/analytics-vidhya/root-mean-square-log-error-rmse-vs-rmlse-935c6cc1802a
+  - RMSE(log(pred), log(target))
+  - Robust to the effect of the outliers
+  - RMSLE incurs a larger penalty for under-estimation than over-estimation
+  - **Under estmation**
+    - Y = 1000, X = 600
+    - RMSE: 400, RMSLE: 0.510
+  - **Over estimation**
+    - Y = 1000, X = 1400
+    - RMSE: 400, RMSLE: 0.33
+  - Eg. predicted delivery time is less than the actual trip takes -> the customer reviews can be affected
+  - ![picture 1](images/7e6812a672096f88844415bd0782c17b20586a61624f1ffb0b73645eae4508bb.png)  
+
+  - ![picture 2](images/fa7fcbf85f39617ad67c44a4803fd729766fbdae89e8391ca8322d60bfff95e0.png)  
+
+- Can you use categorical vars as such or do you need OHE using `Pandas.get_dummies?`
+  - There's no evidence that OHE improves perfomance. DT will work with just the cat var as such.
+
+### Steps involved in creating the RFs
+1. Convert `salePrice` to `log(salePrice)`
+2. Convert ordinal columns to appropriate order
+   ```py 
+    col = col.astype('category')
+    col.cat.set_categories(sizes, ordered=True, inplace=True)
+    ```
+3. Add meta data from dates
+    ```py
+    df = add_datepart(df, 'saledate')
+    ```
+4. Handle strings and missing data
+    ```py
+      # The following are `TableProc`s
+      procs = [Categorify, FillMissing] 
+    ```
+5. Separate out the idxs for training and validation data - don't create separate `df`s yet
+    - If this is a time series, make sure you do appropriate splitting
+    - Similarly, like in the distracted if there are new drivers in test, split accordingly
+  
+    ```py
+    splits = (train_idxs, val_idxs)
+    ```
+
+6. Split continuous and categorical variables
+    ```py
+    cont,cat = cont_cat_split(df, 1, dep_var=dep_var)
+    to = TabularPandas(df, procs, cat, cont, y_names=dep_var, splits=splits)
+    ```
+    ```py
+    # Inside of cont_cat_split
+    if (
+        (
+          pd.api.types.is_integer_dtype(df[label].dtype) and 
+          df[label].unique().shape[0] > max_card
+        ) 
+        or
+        pd.api.types.is_float_dtype(df[label].dtype)
+      ):
+      cont_names.append(label)
+    else: 
+      cat_names.append(label)
+    ```
+
+7. Save `to` before continuing
+
+8. Split train+val, xs+y
+    ```py
+    xs,y = to.train.xs,to.train.y
+    valid_xs,valid_y = to.valid.xs,to.valid.y
+    ```
+9. **Now that all data is numeric and has no missing values**, we can use the **simplest DT** (say max_leaf_nodes=4)
+    ```py
+    m = DecisionTreeRegressor(max_leaf_nodes=4)
+    m.fit(xs, y);
+    ```
+10. Visualize tree
+    ```py
+    draw_tree(m, xs, size=10, leaves_parallel=True, precision=2)ac
+    ```
+11. Use `dtreeviz` to visualize tree with data distribution. Check for anomalies
+    - Year seems to be in correct ranges?
+    - Data changes may not affect splits in any significant ways - resilience of decision trees.
+12. Set constrains and better retrain with full data (`min_samples_leaf=25`)
+    ```py
+    m = DecisionTreeRegressor(min_samples_leaf=25)
+    m.fit(to.train.xs, to.train.y)
+    m_rmse(m, to.train.xs, to.train.y), m_rmse(m, to.valid.xs, to.valid.y)
+    ```
+13. Create a random forest to ensure we don't overfit the data
+    ```py
+    m = RandomForestRegressor(n_jobs=-1, n_estimators=n_estimators,
+          max_samples=max_samples, max_features=max_features,
+          min_samples_leaf=min_samples_leaf, oob_score=True).fit(xs, y)
+    ```
+14. Check OOB error and see if it is in the same range as validation error. If its not the same, it means there's something else other than normal generalization error at play. 
+    - Eg. if its a time series, the dates in the validation set might have something special that is not in the training set
+
+## Random Forests
+- If OOB error is much lower than validation error, it means that something else is causing that error, in addition to normal generalization error.
+- Variable data points + variable features = better generalizations
+- **Using more trees in a random forest does not lead to overfitting, because each tree is independent of the others.**
+## Model Interpretation
+- ### How confident are we in our predictions using a particular row of data?
+  - Take std. deviations of all estimator predicitons. This gives a **relative** confidence
+    ```py
+    preds = np.stack([t.predict(valid_xs) for t in m.estimators_])
+    preds.std(0)  
+    ```
+- ### Which columns are the strongest predictors, which can we ignore?
+    ```py
+    fi = pd.DataFrame(
+        {'cols': df.columns, 'importance': m.feature_importances_}
+    ).sort_values('importance', ascending=False)
+
+    fi[:30].plot(
+        'cols', 'importance', 'barh',
+        figsize=(14,8),
+        legend=False
+    )
+    ```
+    ```py
+    to_keep = feat_imp[feat_imp.importance > .005].cols
+    xs_imp = xs[to_keep]
+    m_imp = rf(xs_imp, y)
+    m_rmse(m_imp, xs_imp, y), m_rmse(m_imp, valid_xs_imp, valid_y), 
+    ```
+- ### Which columns are effectively redundant with each other, for purposes of prediction?
+
+- ### How do predictions vary, as we vary these columns?
+-  **Partial dependence plots** try to answer the question: if a row varied on nothing other than the feature in question, how would it impact the dependent variable?
+
+### Data Leakage
+- The introduction of information about the target of a data mining problem, which should not be legitimately available to mine from.
+- Training set has data that is not available at the time of prediction
+
+
+- To detect data leakage:
+  - Check whether the accuracy of the model is too good to be true.
+  - Look for important predictors that don't make sense in practice.
+  - Look for partial dependence plot results that don't make sense in practice.
+
+- Reinforces idea: Build a model first and then use for data cleaning
+
+- ### Tree Interpreter: For predicting with a particular row of data, what were the most important factors, and how did they influence that prediction?
+  ```py
+  from treeinterpreter import treeinterpreter
+  from waterfall_chart import plot as waterfall
+  
+  prediction, bias, contributions = treeinterpreter.predict(m, rows.values)
+
+  waterfall(
+    valid_xs_final.columns,
+    contributions[0],
+    threshold=.08,
+    rotation_value=45,
+    formatting='{:,.3f}'
+  );
+  ```
+
+### Extrapolation and Neural Nets
+  - RF regressors cannnot predict outside their domain
+  - Particularly problematic for trends over time
+
+### Finding out of Domain data
+  - Build an RF to predict whether data is in training set or val set
+
+### Boosting
+- Basic working
+  - First, a model (m1) is underfit on the training data. 
+  - Then we subtract the predictions from the labels (call these values "residuals")
+  - Then we train a new model (m2) to predict the residuals
+  - Loop until satisfied
+  - Final prediction = m1(x) + m2(x)
+
+- Unlike RF, this has a tendancy to overfit because each model is dependent on the next, eventually you see overfitting on **val set** (how?)
+- `HistGradientBoostingRegressor` in sklearn provides "excellent performance"
+- Unlike random forests, gradient boosted trees are extremely sensitive to the choices of these hyperparameters; in practice, most people use a loop that tries a range of different hyperparameters to find the ones that work best.
+
+### Combining Embeddings with other methods
+- > The embeddings obtained from the trained neural network boost the performance of all tested machine learning methods considerably when used as the input features instead
+- i.e. if you first train a neural network with categorical embeddings, and then use those categorical embeddings instead of the raw categorical columns in the model
+- **i.e. you can get much of the performance improvement of an NN without actually having to use a one at inference time**
+
+
+# Lesson - 8 : Natural Language Processing
+
+- Instead of directly fine tuning a pretrained Wikipedia model to classify IMDb sentiments, we can do even better by first finetuning the Wikipedia model to generate IMDb reviews. Then the next stage would be to finetune that model to classify sentiments.
+- New items in the vocab are randomly initialized
+- regardless of casing most words basically mean the same thing
 - 
