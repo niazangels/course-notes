@@ -496,6 +496,37 @@ show_image(w[0].view(28, 28))
 
 - disinformation can often contain seeds of truth, or half-truths taken out of context. 
 
+# Notes - Chapter 5
+- `RandomResizedCrop` will be added for you if you include the `min_scale` parameter in your aug_transforms 
+- `dls.show_batch(*max_n=16)`
+- Once you think your data looks right, we generally recommend the next step should be using it to train a simple model. 
+- **We often see people put off the training of an actual model for far too long. **
+- The exponential also has a nice property: if one of the numbers in our activations x is slightly bigger than the others, the exponential will amplify this (since it grows, well... exponentially), which means that in the softmax, that number will be closer to 1.
+- Softmax fn really wants to pick one class among the others, so it's ideal for training a classifier when we know each picture has a definite label 
+**- During inference you might want your model to sometimes tell you it doesn't recognize any of the classes** that it has seen during training, and not pick a class because it has a slightly bigger activation score. In this case, it might be better to **train a model using multiple binary output columns**, each using a sigmoid activation.
+
+- With log, multiplication, which can create huge and tiny numbers, can be replaced by addition, which is much less likely to result in overflow/underflow.
+- Despite its name, `F.nll_loss` does not take the log. **It assumes that you already took the log of the softmax.**
+- PyTorch has a function called `log_softmax` that combines `log` and `softmax` in a fast and accurate way. `nll_loss` is designed to be used after `log_softmax`
+- `nn.CrossEntropyLoss` actually does `log_softmax` and then `nll_loss`
+- By default PyTorch loss functions take the mean of the loss of all items. You can use `reduction='none'` to disable that: `nn.CrossEntropyLoss(reduction='none')(acts, targs)`
+- The gradient of `cross_entropy(a,b)` is just `softmax(a)-b`. Since `softmax(a)` is just the final activation of the model, that means that the gradient is proportional to the difference between the prediction and the target.
+  - This is the same as mean squared error in regression (assuming there's no final activation function such as a limiter), since the gradient of `(a-b)**2` is `2*(a-b)`. 
+  - Because the gradient is linear, we won't see sudden jumps in gradients, which should lead to smoother training of models.
+- When we call the `fine_tune` method fastai does two things:
+    - Trains the randomly added layers for one epoch, with all other layers frozen
+    - Unfreezes all of the layers, and trains them all for the number of epochs requested
+- ![picture 1](images/72b267e91cea0d14f4e54a8b012eb53d20c34190aa1b3b83b41aaddad9e44af2.png)  
+- `fastai` lets you pass a Python `slice` object anywhere that a learning rate is expected. 
+  - `(earliest_layer_lr, final_layer_lr)` 
+  - The layers in between will have learning rates that are multiplicatively equidistant throughout that range.
+- Overfitting: val loss starts increasing
+  - But this **does not mean that it is getting less accurate**, necessarily.
+  - You will often see that the training accuracy continues improving
+- > On the other hand, you may well see that the metrics you have chosen are really getting worse at the end of training. Remember, it's **not just that we're looking for the validation loss to get worse, but the actual metrics**. Your validation loss will first get worse during training because the model gets overconfident, and only later will get worse because it is incorrectly memorizing the data. We only care in practice about the latter issue. **Remember, our loss function is just something that we use to allow our optimizer to have something it can differentiate and optimize; it's not actually the thing we care about in practice.**
+- > Before the days of 1cycle training it was very common to save the model at the end of each epoch, and then select whichever model had the best accuracy out of all of the models saved in each epoch. This is known as early stopping. However, this is very unlikely to give you the best answer, because those epochs in the middle occur before the learning rate has had a chance to reach the small values, where it can really find the best result. **Therefore, if you find that you have overfit, what you should actually do is retrain your model from scratch, and this time select a total number of epochs based on where your previous best results were found.**
+- A bigger model has the ability to better capture the real underlying relationships in your data, and also to capture and memorize the specific details of your individual images.
+
 # Lesson 6
 - Q: What is Cross entropy loss?
 - How does LRfinder work? 
@@ -544,33 +575,280 @@ dblock = DataBlock(get_x=lambda x: Image.open(x['fname']),
 
 - Its okay to use the val set to pick a hyperparameter (threshold for acc) if its a smooth curve. Avoid picking a random value from a bumpy curve because you might be just lucky. 
 
-# Notes - Chapter 5
-- `RandomResizedCrop` will be added for you if you include the `min_scale` parameter in your aug_transforms 
-- `dls.show_batch(*max_n=16)`
-- Once you think your data looks right, we generally recommend the next step should be using it to train a simple model. 
-- **We often see people put off the training of an actual model for far too long. **
-- The exponential also has a nice property: if one of the numbers in our activations x is slightly bigger than the others, the exponential will amplify this (since it grows, well... exponentially), which means that in the softmax, that number will be closer to 1.
-- Softmax fn really wants to pick one class among the others, so it's ideal for training a classifier when we know each picture has a definite label 
-**- During inference you might want your model to sometimes tell you it doesn't recognize any of the classes** that it has seen during training, and not pick a class because it has a slightly bigger activation score. In this case, it might be better to **train a model using multiple binary output columns**, each using a sigmoid activation.
+## Multi label classification
+- Zero or Multiple labels for each images
+- **You can use the validation set to pick the `threshold` hyperparameter for your `accuracy_multi`**
+  - You can do this because this is a smooth curve (and not bumpy, and accidental good value)
 
-- With log, multiplication, which can create huge and tiny numbers, can be replaced by addition, which is much less likely to result in overflow/underflow.
-- Despite its name, `F.nll_loss` does not take the log. **It assumes that you already took the log of the softmax.**
-- PyTorch has a function called `log_softmax` that combines `log` and `softmax` in a fast and accurate way. `nll_loss` is designed to be used after `log_softmax`
-- `nn.CrossEntropyLoss` actually does `log_softmax` and then `nll_loss`
-- By default PyTorch loss functions take the mean of the loss of all items. You can use `reduction='none'` to disable that: `nn.CrossEntropyLoss(reduction='none')(acts, targs)`
-- The gradient of `cross_entropy(a,b)` is just `softmax(a)-b`. Since `softmax(a)` is just the final activation of the model, that means that the gradient is proportional to the difference between the prediction and the target.
-  - This is the same as mean squared error in regression (assuming there's no final activation function such as a limiter), since the gradient of `(a-b)**2` is `2*(a-b)`. 
-  - Because the gradient is linear, we won't see sudden jumps in gradients, which should lead to smoother training of models.
-- When we call the `fine_tune` method fastai does two things:
-    - Trains the randomly added layers for one epoch, with all other layers frozen
-    - Unfreezes all of the layers, and trains them all for the number of epochs requested
-- ![picture 1](images/72b267e91cea0d14f4e54a8b012eb53d20c34190aa1b3b83b41aaddad9e44af2.png)  
-- `fastai` lets you pass a Python `slice` object anywhere that a learning rate is expected. 
-  - `(earliest_layer_lr, final_layer_lr)` 
-  - The layers in between will have learning rates that are multiplicatively equidistant throughout that range.
-- Overfitting: val loss starts increasing
-  - But this **does not mean that it is getting less accurate**, necessarily.
-  - You will often see that the training accuracy continues improving
-- > On the other hand, you may well see that the metrics you have chosen are really getting worse at the end of training. Remember, it's **not just that we're looking for the validation loss to get worse, but the actual metrics**. Your validation loss will first get worse during training because the model gets overconfident, and only later will get worse because it is incorrectly memorizing the data. We only care in practice about the latter issue. **Remember, our loss function is just something that we use to allow our optimizer to have something it can differentiate and optimize; it's not actually the thing we care about in practice.**
-- > Before the days of 1cycle training it was very common to save the model at the end of each epoch, and then select whichever model had the best accuracy out of all of the models saved in each epoch. This is known as early stopping. However, this is very unlikely to give you the best answer, because those epochs in the middle occur before the learning rate has had a chance to reach the small values, where it can really find the best result. **Therefore, if you find that you have overfit, what you should actually do is retrain your model from scratch, and this time select a total number of epochs based on where your previous best results were found.**
-- A bigger model has the ability to better capture the real underlying relationships in your data, and also to capture and memorize the specific details of your individual images.
+## Collaborative filtering
+
+```py
+class DotProduct(Module):
+    def __init__(self, n_users, n_movies, n_factors):
+        ...
+        
+    def forward(self, x):
+        users = ...
+        movies = ...
+        # dim=0 is the batch, so we want to sum up dim=1
+        return (users * movies).sum(dim=1)
+```
+
+# Notes - Lesson 6 - Multicat
+
+- Some definitions
+  - `Dataset`: collection that returns a tuple of `(independent, dependent)` values as a single item. They are indexable and have a set length.
+  - `Dataloader`: iterator that provides a stream of mini-batches. Each minibatch contains a tuple of independent vars, and a tuple of dependent vars
+
+- And their plurals for bringing the training and testing together
+  - `Datasets`: obj containing training and testing datasets
+  - `Dataloaders`: obj containing training and testing dataloaders
+
+- It's best to build up the `DataBlock` in stages, so you can see your mistakes as you make them.
+- `F.binary_cross_entropy` and its module equivalent `nn.BCELoss` calculate cross-entropy on a one-hot-encoded target, **but do not include the initial `sigmoid`**. 
+  - Normally for one-hot-encoded targets you'll want `F.binary_cross_entropy_with_logits` (or `nn.BCEWithLogitsLoss`), which do both sigmoid and binary cross-entropy in a single function
+- For multicat, we can't use `accuracy` - we need to use `accuracy_multi`
+
+
+# Notes - Chapter 7 - Tranining a state of the art model
+- > It's particularly unlikely to be the dataset that you want to do your development and prototyping in. You should aim to have an iteration speed of no more than **a couple of minutes**.
+- There is an additional benefit to progressive resizing: it is another form of data augmentation. 
+- Mixup requires far more epochs to train to get better accuracy, compared to other augmentation approaches we've seen
+- >There's another subtle issue that Mixup deals with for us, which is that it's not actually possible with the models we've seen before for our loss to ever be perfect. The problem is that our labels are 1s and 0s, but the outputs of softmax and sigmoid can never equal 1 or 0. This means training our model pushes our activations ever closer to those values, such that the more epochs we do, the more extreme our activations become.
+
+- > With Mixup we no longer have that problem, because our labels will only be exactly 1 or 0 if we happen to "mix" with another image of the same class. The rest of the time our labels will be a linear combination, such as the 0.7 and 0.3 we got in the church and gas station example earlier.
+- Like with Mixup, you won't generally see significant improvements from label smoothing until you train more epochs. 
+- 
+
+# Notes - Chapter 8 - Collaborative filtering
+- What is an embedding?
+  - indexing can be represented as matrix multiplication
+  - for this we need an OHE representation of the index 
+  - no real underlying reason to store the one-hot-encoded vector,
+  - we should just be able to index into an array directly with an integer.
+  - PyTorch includes a special layer that does just this
+  - derivative is identical to OHE matmul
+  - this is called an embedding
+  - the thing that you multiply the one-hot-encoded matrix is called the embedding matrix.
+- Forcing predictions to be between 0 and 5 can improve performance. Just add sigmoid. 
+  - It's actually better to have the range go a little bit over 5, so we use (0, 5.5):
+  - This is because the tail ends of the input need to be infinity to predict extremes in sigmoid.
+  - @niazangels: Jeremy used (0,5,5), but I used (-0.5, 5.5) and got even better results
+
+- Weight decay
+  - `loss_with_wd = loss + wd * (parameters**2).sum()`
+  - But this computation is numerically unstable if you have large weights
+  - However, the derivative is `parameters.grad += wd * 2 * parameters`
+  - We can make `wd` twice as large, and have `parameters.grad += wd * parameters`
+
+- What do you recommend when a new user / new product enters the system?
+  - Use your common sense
+  - Pick some particular user to represent average taste
+- > Think about what questions you could ask them that could help you to understand their tastes. Then you can create a model where the **dependent variable is a user's embedding vector**, and the independent variables are the results of the questions that you ask them, along with their signup metadata.
+- A small number of extremely enthusiastic users may end up effectively setting the recommendations for your whole user base.\
+  - end up attracting more people like them to your system
+- Expect positive feedback loops to be the norm, not the exception. 
+  - Plan for that, and identify up front how you will deal with these issues
+- To reduce the capacity of `DotProductWithBias`so it doesn't overfit:
+  - reduce latent factors
+    - this reduces the model to become simpler
+  - weight decay
+
+- Q: How does fastai suggest embedding dims for collab?
+
+- With `EmbeddingNN` we can directly incorporate other user and movie information, date and time information, or any other information that may be relevant to the recommendation.
+
+## Notes - Chapter 9 - Tabular Data
+- Embedding transforms the categorical variables into inputs that are both continuous and meaningful.
+- > Generally it's a good idea to specify `low_memory=False` unless Pandas actually runs out of memory and returns an error. The `low_memory` parameter, which is True by default, tells Pandas to only look at a few rows of data at a time to figure out what type of data is in each column. This means that Pandas can actually end up using different data type for different rows, which generally leads to data processing errors or model training problems later.
+- Handle ordinals (classes with natural order)
+- **RMSLE**
+  - From: https://medium.com/analytics-vidhya/root-mean-square-log-error-rmse-vs-rmlse-935c6cc1802a
+  - RMSE(log(pred), log(target))
+  - Robust to the effect of the outliers
+  - RMSLE incurs a larger penalty for under-estimation than over-estimation
+  - **Under estmation**
+    - Y = 1000, X = 600
+    - RMSE: 400, RMSLE: 0.510
+  - **Over estimation**
+    - Y = 1000, X = 1400
+    - RMSE: 400, RMSLE: 0.33
+  - Eg. predicted delivery time is less than the actual trip takes -> the customer reviews can be affected
+  - ![picture 1](images/7e6812a672096f88844415bd0782c17b20586a61624f1ffb0b73645eae4508bb.png)  
+
+  - ![picture 2](images/fa7fcbf85f39617ad67c44a4803fd729766fbdae89e8391ca8322d60bfff95e0.png)  
+
+- Can you use categorical vars as such or do you need OHE using `Pandas.get_dummies?`
+  - There's no evidence that OHE improves perfomance. DT will work with just the cat var as such.
+
+### Steps involved in creating the RFs
+1. Convert `salePrice` to `log(salePrice)`
+2. Convert ordinal columns to appropriate order
+   ```py 
+    col = col.astype('category')
+    col.cat.set_categories(sizes, ordered=True, inplace=True)
+    ```
+3. Add meta data from dates
+    ```py
+    df = add_datepart(df, 'saledate')
+    ```
+4. Handle strings and missing data
+    ```py
+      # The following are `TableProc`s
+      procs = [Categorify, FillMissing] 
+    ```
+5. Separate out the idxs for training and validation data - don't create separate `df`s yet
+    - If this is a time series, make sure you do appropriate splitting
+    - Similarly, like in the distracted if there are new drivers in test, split accordingly
+  
+    ```py
+    splits = (train_idxs, val_idxs)
+    ```
+
+6. Split continuous and categorical variables
+    ```py
+    cont,cat = cont_cat_split(df, 1, dep_var=dep_var)
+    to = TabularPandas(df, procs, cat, cont, y_names=dep_var, splits=splits)
+    ```
+    ```py
+    # Inside of cont_cat_split
+    if (
+        (
+          pd.api.types.is_integer_dtype(df[label].dtype) and 
+          df[label].unique().shape[0] > max_card
+        ) 
+        or
+        pd.api.types.is_float_dtype(df[label].dtype)
+      ):
+      cont_names.append(label)
+    else: 
+      cat_names.append(label)
+    ```
+
+7. Save `to` before continuing
+
+8. Split train+val, xs+y
+    ```py
+    xs,y = to.train.xs,to.train.y
+    valid_xs,valid_y = to.valid.xs,to.valid.y
+    ```
+9. **Now that all data is numeric and has no missing values**, we can use the **simplest DT** (say max_leaf_nodes=4)
+    ```py
+    m = DecisionTreeRegressor(max_leaf_nodes=4)
+    m.fit(xs, y);
+    ```
+10. Visualize tree
+    ```py
+    draw_tree(m, xs, size=10, leaves_parallel=True, precision=2)ac
+    ```
+11. Use `dtreeviz` to visualize tree with data distribution. Check for anomalies
+    - Year seems to be in correct ranges?
+    - Data changes may not affect splits in any significant ways - resilience of decision trees.
+12. Set constrains and better retrain with full data (`min_samples_leaf=25`)
+    ```py
+    m = DecisionTreeRegressor(min_samples_leaf=25)
+    m.fit(to.train.xs, to.train.y)
+    m_rmse(m, to.train.xs, to.train.y), m_rmse(m, to.valid.xs, to.valid.y)
+    ```
+13. Create a random forest to ensure we don't overfit the data
+    ```py
+    m = RandomForestRegressor(n_jobs=-1, n_estimators=n_estimators,
+          max_samples=max_samples, max_features=max_features,
+          min_samples_leaf=min_samples_leaf, oob_score=True).fit(xs, y)
+    ```
+14. Check OOB error and see if it is in the same range as validation error. If its not the same, it means there's something else other than normal generalization error at play. 
+    - Eg. if its a time series, the dates in the validation set might have something special that is not in the training set
+
+## Random Forests
+- If OOB error is much lower than validation error, it means that something else is causing that error, in addition to normal generalization error.
+- Variable data points + variable features = better generalizations
+- **Using more trees in a random forest does not lead to overfitting, because each tree is independent of the others.**
+## Model Interpretation
+- ### How confident are we in our predictions using a particular row of data?
+  - Take std. deviations of all estimator predicitons. This gives a **relative** confidence
+    ```py
+    preds = np.stack([t.predict(valid_xs) for t in m.estimators_])
+    preds.std(0)  
+    ```
+- ### Which columns are the strongest predictors, which can we ignore?
+    ```py
+    fi = pd.DataFrame(
+        {'cols': df.columns, 'importance': m.feature_importances_}
+    ).sort_values('importance', ascending=False)
+
+    fi[:30].plot(
+        'cols', 'importance', 'barh',
+        figsize=(14,8),
+        legend=False
+    )
+    ```
+    ```py
+    to_keep = feat_imp[feat_imp.importance > .005].cols
+    xs_imp = xs[to_keep]
+    m_imp = rf(xs_imp, y)
+    m_rmse(m_imp, xs_imp, y), m_rmse(m_imp, valid_xs_imp, valid_y), 
+    ```
+- ### Which columns are effectively redundant with each other, for purposes of prediction?
+
+- ### How do predictions vary, as we vary these columns?
+-  **Partial dependence plots** try to answer the question: if a row varied on nothing other than the feature in question, how would it impact the dependent variable?
+
+### Data Leakage
+- The introduction of information about the target of a data mining problem, which should not be legitimately available to mine from.
+- Training set has data that is not available at the time of prediction
+
+
+- To detect data leakage:
+  - Check whether the accuracy of the model is too good to be true.
+  - Look for important predictors that don't make sense in practice.
+  - Look for partial dependence plot results that don't make sense in practice.
+
+- Reinforces idea: Build a model first and then use for data cleaning
+
+- ### Tree Interpreter: For predicting with a particular row of data, what were the most important factors, and how did they influence that prediction?
+  ```py
+  from treeinterpreter import treeinterpreter
+  from waterfall_chart import plot as waterfall
+  
+  prediction, bias, contributions = treeinterpreter.predict(m, rows.values)
+
+  waterfall(
+    valid_xs_final.columns,
+    contributions[0],
+    threshold=.08,
+    rotation_value=45,
+    formatting='{:,.3f}'
+  );
+  ```
+
+### Extrapolation and Neural Nets
+  - RF regressors cannnot predict outside their domain
+  - Particularly problematic for trends over time
+
+### Finding out of Domain data
+  - Build an RF to predict whether data is in training set or val set
+
+### Boosting
+- Basic working
+  - First, a model (m1) is underfit on the training data. 
+  - Then we subtract the predictions from the labels (call these values "residuals")
+  - Then we train a new model (m2) to predict the residuals
+  - Loop until satisfied
+  - Final prediction = m1(x) + m2(x)
+
+- Unlike RF, this has a tendancy to overfit because each model is dependent on the next, eventually you see overfitting on **val set** (how?)
+- `HistGradientBoostingRegressor` in sklearn provides "excellent performance"
+- Unlike random forests, gradient boosted trees are extremely sensitive to the choices of these hyperparameters; in practice, most people use a loop that tries a range of different hyperparameters to find the ones that work best.
+
+### Combining Embeddings with other methods
+- > The embeddings obtained from the trained neural network boost the performance of all tested machine learning methods considerably when used as the input features instead
+- i.e. if you first train a neural network with categorical embeddings, and then use those categorical embeddings instead of the raw categorical columns in the model
+- **i.e. you can get much of the performance improvement of an NN without actually having to use a one at inference time**
+
+
+# Lesson - 8 : Natural Language Processing
+
+- Instead of directly fine tuning a pretrained Wikipedia model to classify IMDb sentiments, we can do even better by first finetuning the Wikipedia model to generate IMDb reviews. Then the next stage would be to finetune that model to classify sentiments.
+- New items in the vocab are randomly initialized
+- regardless of casing most words basically mean the same thing
+- 
