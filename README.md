@@ -3,9 +3,11 @@
 
 ## Product management
 - 📙 [Shape Up](shape-up/README.md) / [Full book](https://basecamp.com/shapeup)
+- 🖥️ [Become a Product Manager](become-a-product-manager/README.md) / [Udemy](https://www.udemy.com/course/become-a-product-manager-learn-the-skills-get-a-job/)
+
 
 ## Product design
--  🖥️ [Product Design: The Delft Design Approach](product-design-delft-design-approach/) / ([edX](https://www.edx.org/course/product-design-the-delft-design-approach))
+ -  🖥️ [Product Design: The Delft Design Approach](product-design-delft-design-approach/) / ([edX](https://www.edx.org/course/product-design-the-delft-design-approach))
 
 ## Machine Learning
 - 🖥️ [Fastai - 2020](fastai/) / ([course.fast.ai](https://course.fast.ai))
